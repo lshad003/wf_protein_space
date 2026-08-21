@@ -1,0 +1,18 @@
+# data: never in git
+catalog/
+tmp/
+logs/
+*.fa
+*.fa.gz
+*.faa
+*.fasta
+*.fastq*
+*.gff
+*.gff.gz
+*.bam
+*.sam
+*.db
+*.index
+# large results, keep summaries only
+results/*.tsv.gz
+results/counts_*
