@@ -24,7 +24,7 @@ reframes the work as a protein-space catalog: size, growth per cohort, unknown
 ## Verified facts (all confirmed against source files)
 Samples (source: ncbi-deposit/results/deposit_classification_v2.tsv,
 year column is wf_year; classification is only WF-vs-wild):
-- WF22 50 stems / 19 animals, longitudinal (tp-dist 1:4, 3:14, 4:1)
+- WF22 50 stems / 19 animals, longitudinal (timepoints per animal: 1x4, 3x14, 4x1). 44 stems after the 6 exclusions listed below; the catalog was built from all 50, analyses use the 44.
 
 Design coverage of the SEQUENCED samples (45/45 joined to year databases):
 - WF23 sequenced: all 9 are egg_mass 3. Treatment 5 Control vs 4 UHM520.7734.
