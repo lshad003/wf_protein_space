@@ -25,8 +25,6 @@ reframes the work as a protein-space catalog: size, growth per cohort, unknown
 Samples (source: ncbi-deposit/results/deposit_classification_v2.tsv,
 year column is wf_year; classification is only WF-vs-wild):
 - WF22 50 stems / 19 animals, longitudinal (tp-dist 1:4, 3:14, 4:1)
-- WF23  9 stems /  9 animals, one monthly-pool metagenome per animal (timepoint IDs 40991-40999)
-- WF24 36 stems / 36 animals, one monthly-pool metagenome per animal (timepoint IDs 41000-41034, 41909)
 
 Design coverage of the SEQUENCED samples (45/45 joined to year databases):
 - WF23 sequenced: all 9 are egg_mass 3. Treatment 5 Control vs 4 UHM520.7734.
@@ -116,78 +114,17 @@ Note for the extension: catalog construction and abundance analysis use
 different sample sets. Any catalog-level count refers to the build set;
 any abundance or statistical result refers to the analysis set.
 
-
-## Longitudinal sampling in WF23 and WF24 (clarification)
-The sequenced animals WERE sampled repeatedly over time. Verified from the year
-databases: each of the 9 sequenced WF23 animals has 15 to 42 dated fecal
-collections with lab biosample IDs; each of the 36 sequenced WF24 animals has
-5 to 7, held in a sheet named `pooled_samples`.
-
-WF22 practice was to pool fecal material by month before sequencing (see the
-`pool_month` tables in the v1 directory), and the WF24 sheet name indicates the
-same practice, so each WF23/WF24 library most likely represents pooled material
-spanning several collection dates rather than a single moment.
-
-What this means analytically: WF22 has 3 to 4 libraries per animal and therefore
-supports within-animal comparison across development; WF23 and WF24 have one
-library per animal, so they do not, regardless of how many collections went into
-that library.
-
-Not yet verifiable: which specific lab collections were pooled into each
-sequencing library. Requires the sequencing submission sheet that maps library
-numbers (40991+) to lab biosample numbers (WF23 8070s-18000s, WF24 8270s).
-
-
-## Sampling and pooling design (WF22 template)
-Fecal samples were collected weekly and pooled by month; each sequenced
-metagenome is one month's pool for one animal. WF22 therefore has 3 metagenomes
-per animal across the 3-month experiment (e.g. UHM20 -> 10828, 35743, 35744),
-which is what supports the within-animal developmental comparison.
-
-WF23 and WF24 have one metagenome per animal, so one month's pool per animal was
-sequenced while the remaining monthly pools stay banked. Which month each
-sequenced pool represents is not yet known; it requires the submission sheet
-mapping timepoint IDs (40991+) to lab biosample IDs. This matters because if
-sequenced pools come from different months across animals, month is an
-uncontrolled variable in the WF24 treatment comparison.
-
-### Step 2 - mapping-rate diagnostic (2026-08-21)
-200k-protein random subsample of the 45 new samples searched against v1 tiers,
-MMseqs2 13-45111, -s 4, e<=1e-5, -c 0.8.
-
-A WF22 positive control (proteins that built the catalog, so expected ~100%)
-showed that `--cov-mode 1` and `--cov-mode 0` systematically miss short proteins
-(control only 61.4% and 60.9%). `--cov-mode 2` (coverage of the query) recovers
-the control at 98.25% and is the correct setting for this comparison.
-
-Verified rates under cov-mode 2:
-
-| search | rate |
-|--------|------|
-| control: WF22 vs 95% tier | 98.25% |
-| new 45 vs 95% tier (gene level) | 46.15% |
-| new 45 vs 50% tier (family level) | 66.66% |
-
-Interpretation: roughly 54% of WF23/WF24 proteins are novel at gene level and
-33% at family level. Gene-level space is far from saturated while family-level
-space is better covered, matching the UHGP pattern.
-Scripts: scripts/step2c_diagnostic_epyc.sh, step2d_control_and_tiers.sh,
-step2e_covmode2.sh
-Note: MMseqs2 crashes with Illegal instruction on non-epyc nodes; always use -p epyc.
-
-## Sample structure, verified
+## Sample structure
 Fecal samples were collected weekly and pooled by month. Each sequenced
-metagenome is one monthly pool for one animal; the stem is
-<animal>.<timepoint-ID>, e.g. UHM20.10828, UHM20.35743, UHM20.35744 are three
-consecutive monthly pools for animal UHM20.
+metagenome is one monthly pool for one animal. The stem is
+<animal>.<timepoint>, so UHM20.10828, UHM20.35743 and UHM20.35744 are three
+consecutive monthly pools from animal UHM20.
 
 - WF22: 50 metagenomes from 19 animals, multiple monthly pools per animal
   (4 animals with 1, 14 with 3, 1 with 4). Supports within-animal comparison
   across development.
-- WF23: 9 metagenomes from 9 distinct animals, one monthly pool each,
-  all from the same month.
-- WF24: 36 metagenomes from 36 distinct animals, one monthly pool each.
+- WF23: 9 metagenomes from 9 animals, one monthly pool each, all from the
+  same month.
+- WF24: 36 metagenomes from 36 animals, one monthly pool each.
 
-Remaining monthly pools for WF23 and WF24 animals are banked, not sequenced.
-WF24 metamorphosis dates span 2024-04-07 to 2024-05-19, so time since
-metamorphosis at collection varies across animals.
+Remaining monthly pools for the WF23 and WF24 animals are banked.
