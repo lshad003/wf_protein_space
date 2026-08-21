@@ -111,3 +111,13 @@ MMseqs2 MUST be pinned to 13-45111 (bare `module load mmseqs2` gives 17).
 MMseqs2 jobs MUST use -p epyc (crashes with Illegal instruction on some nodes).
 /bigdata was 98% full on 2026-08-21; check space before large jobs.
 md files are append-only; wrong analyses are marked corrected with a date, never deleted.
+
+## INSTRUCTIONS FOR CLAUDE CODE
+Execute ONE step per session, the one the user names. After the step's checks
+pass, append a dated entry to logs/step_log.md and STOP. Do not begin the next
+step. If a check fails, report and STOP; do not "fix" it by changing the plan.
+Never modify anything under /bigdata/stajichlab/shared/ (read-only for us).
+Write all outputs under /bigdata/stajichlab/lshad003/wf_protein_space/.
+Heavy work goes in an sbatch script (-p epyc for MMseqs2), never on the login node.
+Do not commit data files; .gitignore covers fasta/faa/gff/bam and catalog/.
+Before claiming any number, show the command that produced it.
