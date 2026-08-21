@@ -150,3 +150,27 @@ sequenced pool represents is not yet known; it requires the submission sheet
 mapping metagenome IDs (40991+) to lab biosample IDs. This matters because if
 sequenced pools come from different months across animals, month is an
 uncontrolled variable in the WF24 treatment comparison.
+
+### Step 2 - mapping-rate diagnostic (2026-08-21)
+200k-protein random subsample of the 45 new samples searched against v1 tiers,
+MMseqs2 13-45111, -s 4, e<=1e-5, -c 0.8.
+
+A WF22 positive control (proteins that built the catalog, so expected ~100%)
+showed that `--cov-mode 1` and `--cov-mode 0` systematically miss short proteins
+(control only 61.4% and 60.9%). `--cov-mode 2` (coverage of the query) recovers
+the control at 98.25% and is the correct setting for this comparison.
+
+Verified rates under cov-mode 2:
+
+| search | rate |
+|--------|------|
+| control: WF22 vs 95% tier | 98.25% |
+| new 45 vs 95% tier (gene level) | 46.15% |
+| new 45 vs 50% tier (family level) | 66.66% |
+
+Interpretation: roughly 54% of WF23/WF24 proteins are novel at gene level and
+33% at family level. Gene-level space is far from saturated while family-level
+space is better covered, matching the UHGP pattern.
+Scripts: scripts/step2c_diagnostic_epyc.sh, step2d_control_and_tiers.sh,
+step2e_covmode2.sh
+Note: MMseqs2 crashes with Illegal instruction on non-epyc nodes; always use -p epyc.
