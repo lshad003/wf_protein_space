@@ -128,3 +128,12 @@ consecutive monthly pools from animal UHM20.
 - WF24: 36 metagenomes from 36 animals, one monthly pool each.
 
 Remaining monthly pools for the WF23 and WF24 animals are banked.
+
+## INSTRUCTIONS FOR CLAUDE CODE
+Execute ONE step per session, the one the user names. After the step's checks
+pass, append a dated entry to logs/step_log.md and STOP. Do not begin the next
+step. If a check fails, report and STOP; do not change the plan to make it pass.
+Never modify anything under /bigdata/stajichlab/shared/ (read-only).
+Write all outputs under /bigdata/stajichlab/lshad003/wf_protein_space/.
+Heavy work goes in an sbatch script (-p epyc for MMseqs2), never the login node.
+Do not commit data files. Before stating any number, show the command that produced it.
