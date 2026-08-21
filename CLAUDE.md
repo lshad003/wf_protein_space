@@ -25,8 +25,8 @@ reframes the work as a protein-space catalog: size, growth per cohort, unknown
 Samples (source: ncbi-deposit/results/deposit_classification_v2.tsv,
 year column is wf_year; classification is only WF-vs-wild):
 - WF22 50 stems / 19 animals, longitudinal (tp-dist 1:4, 3:14, 4:1)
-- WF23  9 stems /  9 animals, one monthly-pool metagenome per animal (libs 40991-40999)
-- WF24 36 stems / 36 animals, one monthly-pool metagenome per animal (libs 41000-41034, 41909)
+- WF23  9 stems /  9 animals, one monthly-pool metagenome per animal (timepoint IDs 40991-40999)
+- WF24 36 stems / 36 animals, one monthly-pool metagenome per animal (timepoint IDs 41000-41034, 41909)
 
 Design coverage of the SEQUENCED samples (45/45 joined to year databases):
 - WF23 sequenced: all 9 are egg_mass 3. Treatment 5 Control vs 4 UHM520.7734.
@@ -147,7 +147,7 @@ which is what supports the within-animal developmental comparison.
 WF23 and WF24 have one metagenome per animal, so one month's pool per animal was
 sequenced while the remaining monthly pools stay banked. Which month each
 sequenced pool represents is not yet known; it requires the submission sheet
-mapping metagenome IDs (40991+) to lab biosample IDs. This matters because if
+mapping timepoint IDs (40991+) to lab biosample IDs. This matters because if
 sequenced pools come from different months across animals, month is an
 uncontrolled variable in the WF24 treatment comparison.
 
