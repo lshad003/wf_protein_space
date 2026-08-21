@@ -19,3 +19,4 @@ results/counts_*
 *.m8
 *.faa
 results/step2*_hits.m8
+results/clusters_*

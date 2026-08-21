@@ -129,11 +129,15 @@ consecutive monthly pools from animal UHM20.
 
 Remaining monthly pools for the WF23 and WF24 animals are banked.
 
-## INSTRUCTIONS FOR CLAUDE CODE
-Execute ONE step per session, the one the user names. After the step's checks
-pass, append a dated entry to logs/step_log.md and STOP. Do not begin the next
-step. If a check fails, report and STOP; do not change the plan to make it pass.
-Never modify anything under /bigdata/stajichlab/shared/ (read-only).
-Write all outputs under /bigdata/stajichlab/lshad003/wf_protein_space/.
-Heavy work goes in an sbatch script (-p epyc for MMseqs2), never the login node.
-Do not commit data files. Before stating any number, show the command that produced it.
+## Catalog built 2026-08-21
+89 metagenomes (44 WF22 + 9 WF23 + 36 WF24), 40,550,595 input proteins.
+MMseqs2 13-45111, `mmseqs cluster -c 0.8 --cov-mode 1 --kmer-per-seq 80`.
+
+| tier | representatives |
+|------|-----------------|
+| 95%  | 6,182,117 |
+| 90%  | 5,361,227 |
+| 50%  | 2,922,537 |
+
+The 100% tier was not built. Database: catalog/db/LsPS_AA
+Script: scripts/step2_cluster.sh

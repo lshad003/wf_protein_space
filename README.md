@@ -128,3 +128,16 @@ consecutive monthly pools from animal UHM20.
 - WF24: 36 metagenomes from 36 animals, one monthly pool each.
 
 Remaining monthly pools for the WF23 and WF24 animals are banked.
+
+## Catalog built 2026-08-21
+89 metagenomes (44 WF22 + 9 WF23 + 36 WF24), 40,550,595 input proteins.
+MMseqs2 13-45111, `mmseqs cluster -c 0.8 --cov-mode 1 --kmer-per-seq 80`.
+
+| tier | representatives |
+|------|-----------------|
+| 95%  | 6,182,117 |
+| 90%  | 5,361,227 |
+| 50%  | 2,922,537 |
+
+The 100% tier was not built. Database: catalog/db/LsPS_AA
+Script: scripts/step2_cluster.sh
