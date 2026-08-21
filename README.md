@@ -111,3 +111,25 @@ MMseqs2 MUST be pinned to 13-45111 (bare `module load mmseqs2` gives 17).
 MMseqs2 jobs MUST use -p epyc (crashes with Illegal instruction on some nodes).
 /bigdata was 98% full on 2026-08-21; check space before large jobs.
 md files are append-only; wrong analyses are marked corrected with a date, never deleted.
+
+## WF22 analysis set (v1 manuscript)
+50 WF22 samples were collected and used to build the v1 catalog; 44 passed
+review and carried into abundance and statistical analyses.
+
+Six exclusions:
+
+| sample | reason |
+|--------|--------|
+| UHM56.10839  | anomalously high Basidiobolus reads in a control (3.09%) |
+| UHM102.35765 | post-sequencing quality review |
+| UHM27.10829  | animal died before completing the 3-month experiment |
+| UHM33.10831  | animal died before completing the 3-month experiment |
+| UHM43.10836  | animal died before completing the 3-month experiment |
+| UHM44.10837  | animal died before completing the 3-month experiment |
+
+Final analysis set: 44 samples (EM1 8, EM2 9, EM3 27). EM3 is larger because
+it received both Basidiobolus strains (STP1717.1 and STP1710.7) plus controls.
+
+Note for the extension: catalog construction and abundance analysis use
+different sample sets. Any catalog-level count refers to the build set;
+any abundance or statistical result refers to the analysis set.

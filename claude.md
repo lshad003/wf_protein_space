@@ -86,3 +86,14 @@ Infrastructure:
 
 ## CLUSTER LOGIN (appended 2026-08-21)
 scp/ssh host: lshad003@cluster.hpcc.ucr.edu
+
+## CORRECTION (Aug 21, 2026): LsFMGC95 status
+Earlier text called LsFMGC95 "published". It is NOT published: it is v1
+manuscript-stage, WF22-only, 5,055,108 representative genes, drafted and
+circulated but not submitted/accepted.
+Implication: no published numbers are locked by a rebuild. Incremental
+clustering is still preferred, but for a different reason: it preserves gene
+IDs already used in v1 figures, DESeq2 outputs, and the per-sample annotation
+tables shared with Joshua Phillips, avoiding redoing verified work.
+Language rule going forward: say "v1 manuscript" or "v1 catalog", never
+"published catalog".
