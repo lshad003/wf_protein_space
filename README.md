@@ -51,24 +51,6 @@ Step 1 outputs (this project):
 - Per-sample counts: results/step1_protein_counts_45.tsv
 - UHM585.41009 is a small outlier (313,220 proteins, 64 MB assembly).
 
-## OPEN ISSUE 1: v1 catalog contains 2 non-wood-frog samples
-The v1 build used 52 input files, not the 50 stated in the manuscript.
-The extra two are UHM739.35775 and UHM740.35774, classified `wild`,
-host_species `alleganiensis` (hellbender, a salamander), source `zoo`, TN,
-collected 5/2023. They contributed 2,994,130 proteins (~14% of the 21.3M input).
-They are absent from all WF22 metadata files and from the 44-sample analysis set.
-Consequence: all catalog-descriptive numbers (input genes, representative counts,
-saturation curve, annotation percentages) reflect a 52-sample build.
-Abundance/DESeq2 results are structurally unaffected (only 44 WF22 samples were
-mapped) but are not guaranteed identical to a clean build.
-DECISION PENDING: carry forward (incremental) vs rebuild from a defined
-wood-frog-only set.
-
-## OPEN ISSUE 2: library-to-tube map missing
-Nothing joins sequencing library numbers (40991+) to lab fecal biosample numbers
-(WF23 7870s, WF24 8270s). Collection dates for the 45 sequenced samples are
-therefore unknown. Needs the Walker group submission sheet.
-
 ## Plan
 Step 0  DONE  Inventory: stems, timepoints, existing predictions, pipeline scripts
 Step 1  DONE  Gene prediction for 14 missing stems + rename all 45

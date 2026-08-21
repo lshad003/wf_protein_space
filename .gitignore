@@ -16,3 +16,6 @@ logs/
 # large results, keep summaries only
 results/*.tsv.gz
 results/counts_*
+*.m8
+*.faa
+results/step2*_hits.m8
