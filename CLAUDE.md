@@ -174,3 +174,20 @@ space is better covered, matching the UHGP pattern.
 Scripts: scripts/step2c_diagnostic_epyc.sh, step2d_control_and_tiers.sh,
 step2e_covmode2.sh
 Note: MMseqs2 crashes with Illegal instruction on non-epyc nodes; always use -p epyc.
+
+## Sample structure, verified
+Fecal samples were collected weekly and pooled by month. Each sequenced
+metagenome is one monthly pool for one animal; the stem is
+<animal>.<timepoint-ID>, e.g. UHM20.10828, UHM20.35743, UHM20.35744 are three
+consecutive monthly pools for animal UHM20.
+
+- WF22: 50 metagenomes from 19 animals, multiple monthly pools per animal
+  (4 animals with 1, 14 with 3, 1 with 4). Supports within-animal comparison
+  across development.
+- WF23: 9 metagenomes from 9 distinct animals, one monthly pool each,
+  all from the same month.
+- WF24: 36 metagenomes from 36 distinct animals, one monthly pool each.
+
+Remaining monthly pools for WF23 and WF24 animals are banked, not sequenced.
+WF24 metamorphosis dates span 2024-04-07 to 2024-05-19, so time since
+metamorphosis at collection varies across animals.
