@@ -26,7 +26,7 @@ Samples (source: ncbi-deposit/results/deposit_classification_v2.tsv,
 year column is wf_year; classification is only WF-vs-wild):
 - WF22 50 stems / 19 animals, longitudinal (tp-dist 1:4, 3:14, 4:1)
 - WF23  9 stems /  9 animals, ONE library each (libs 40991-40999)
-- WF24 36 stems / 36 animals, ONE library each (libs 41000-41034, 41909)
+- WF24 36 stems / 36 animals, one sequencing library per animal (libs 41000-41034, 41909)
 
 Design coverage of the SEQUENCED samples (45/45 joined to year databases):
 - WF23 sequenced: all 9 are egg_mass 3. Treatment 5 Control vs 4 UHM520.7734.
@@ -115,3 +115,24 @@ it received both Basidiobolus strains (STP1717.1 and STP1710.7) plus controls.
 Note for the extension: catalog construction and abundance analysis use
 different sample sets. Any catalog-level count refers to the build set;
 any abundance or statistical result refers to the analysis set.
+
+
+## Longitudinal sampling in WF23 and WF24 (clarification)
+The sequenced animals WERE sampled repeatedly over time. Verified from the year
+databases: each of the 9 sequenced WF23 animals has 15 to 42 dated fecal
+collections with lab biosample IDs; each of the 36 sequenced WF24 animals has
+5 to 7, held in a sheet named `pooled_samples`.
+
+WF22 practice was to pool fecal material by month before sequencing (see the
+`pool_month` tables in the v1 directory), and the WF24 sheet name indicates the
+same practice, so each WF23/WF24 library most likely represents pooled material
+spanning several collection dates rather than a single moment.
+
+What this means analytically: WF22 has 3 to 4 libraries per animal and therefore
+supports within-animal comparison across development; WF23 and WF24 have one
+library per animal, so they do not, regardless of how many collections went into
+that library.
+
+Not yet verifiable: which specific lab collections were pooled into each
+sequencing library. Requires the sequencing submission sheet that maps library
+numbers (40991+) to lab biosample numbers (WF23 8070s-18000s, WF24 8270s).
