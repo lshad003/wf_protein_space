@@ -141,3 +141,29 @@ MMseqs2 13-45111, `mmseqs cluster -c 0.8 --cov-mode 1 --kmer-per-seq 80`.
 
 The 100% tier was not built. Database: catalog/db/LsPS_AA
 Script: scripts/step2_cluster.sh
+
+## Catalog composition (2026-08-21)
+
+Cluster quality filtering matters: 55.27% of 95% tier clusters are singletons.
+Applying a FESNov-style filter (>=3 members from >=2 samples) leaves 2,069,453
+clusters (33.5%), and cohort sharing rises sharply: clusters shared by all three
+cohorts go from 6.71% to 20.06%.
+
+Equal-n comparison (9 samples per cohort, 10 random draws, filtered clusters,
+mean 1,058,777 per draw): WF24-only 26.13%, all three 24.22%, WF22+WF23 13.74%,
+WF23+WF24 12.36%, WF22-only 9.26%, WF22+WF24 7.45%, WF23-only 6.83%.
+WF22-only falls from 15.12% to 9.26% once its sample-count advantage is removed.
+
+Per-sample richness at 9 samples: WF22 765,122 clusters, WF23 1,166,662,
+WF24 2,331,079. Tracks per-sample protein yield, so depth must be controlled
+before any biological interpretation.
+
+Pooled rarefaction (95% tier, 3 permutations): 1 sample ~400k clusters,
+50 samples ~4.4M, 89 samples 6,182,117, still rising ~350k per 10 samples.
+Gene-level protein space is not saturated.
+
+Cluster size distribution, 50% tier: top 1% of clusters hold 45.85% of proteins
+(comparable to GMGC's 0.6% of families holding 50% of genes).
+
+Scripts: step3_cluster_composition.sh, step4_nonsingleton.sh,
+step5_equaln_rarefaction.sh
