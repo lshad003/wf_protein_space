@@ -167,3 +167,30 @@ Cluster size distribution, 50% tier: top 1% of clusters hold 45.85% of proteins
 
 Scripts: step3_cluster_composition.sh, step4_nonsingleton.sh,
 step5_equaln_rarefaction.sh
+
+## Batch structure and technical variation (2026-08-21)
+Table: results/batch_table_89.tsv (89 rows, no missing values)
+
+Sequencing runs are not fully confounded with cohort. WF23 and WF24 share run
+UCB_20250426_M005990, and WF24 spans two runs, which permits direct estimation
+of batch effects. WF22 occupies separate runs at two centers (UCB, UCD) plus one
+AVITI run, so WF22 vs new-cohort contrasts cannot be separated from batch.
+
+Median clean reads / median proteins per sample:
+- WF22 195.1M / 355,061; WF23 244.3M / 422,857; WF24 233.5M / 509,171
+
+Contrast 1, same run (UCB_20250426_M005990): WF23 422,857 proteins vs WF24
+415,208. Cohort alone does not affect protein yield.
+
+Contrast 2, WF24 across runs: UCB_20250426 415,208 proteins vs UCB_20250730
+756,692, a 1.8x difference on only 1.24x more reads.
+
+Cause is assembly size, not gene prediction: proteins per MB of assembled contigs
+is constant across all 45 new samples (median 4,580 for pre-existing predictions,
+4,602 for those predicted in 2026; 4,615 vs 4,602 by sequencing run; range
+4,047-4,969).
+
+Consequence: per-sample cluster richness tracks assembled sequence per sample.
+Differences in rarefaction between cohorts reflect assembly yield and cannot be
+interpreted as biological diversity without depth normalization.
+Script: scripts/step6b_batch_table.sh
