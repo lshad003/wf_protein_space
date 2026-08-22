@@ -1,0 +1,5 @@
+## Fri Aug 21 20:33:11 2026
+## emapper-2.1.3
+## /opt/linux/rocky/8.x/x86_64/pkgs/eggnog-mapper/2.1.9/env/bin/emapper.py -m no_search --annotate_hits_table /bigdata/stajichlab/lshad003/wf_protein_space/results/eggnog/LsPS.1.emapper.hits -o B1 --output_dir /bigdata/stajichlab/lshad003/wf_protein_space/results/eggnog_test --cpu 16 --data_dir /scratch/lshad003_eggnog_db --override
+##
+#query	seed_ortholog	evalue	score	eggNOG_OGs	max_annot_lvl	COG_category	Description	Preferred_name	GOs	EC	KEGG_ko	KEGG_Pathway	KEGG_Module	KEGG_Reaction	KEGG_rclass	BRITE	KEGG_TC	CAZy	BiGG_Reaction	PFAMs

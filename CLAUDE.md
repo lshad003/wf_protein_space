@@ -194,3 +194,10 @@ Consequence: per-sample cluster richness tracks assembled sequence per sample.
 Differences in rarefaction between cohorts reflect assembly yield and cannot be
 interpreted as biological diversity without depth normalization.
 Script: scripts/step6b_batch_table.sh
+
+## INSTRUCTIONS FOR CLAUDE CODE
+Execute one step per session, the one named. After its checks pass, append a
+dated entry to logs/step_log.md and stop. Never modify anything under
+/bigdata/stajichlab/shared/. Write outputs under this project directory. Heavy
+work goes in an sbatch script on -p epyc, never the login node. Do not commit
+data files. Before stating any number, show the command that produced it.
