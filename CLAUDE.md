@@ -195,5 +195,7 @@ sampling effort.
 Execute one step per session, the one named. After its checks pass, append a
 dated entry to logs/step_log.md and stop. Never modify anything under
 /bigdata/stajichlab/shared/. Write outputs under this project directory. Heavy
-work goes in an sbatch script on -p epyc, never the login node. Do not commit
-data files. Before stating any number, show the command that produced it.
+work goes in an sbatch script, never the login node: -p epyc for MMseqs2 and
+eggNOG, -p stajichlab for light jobs. -p short caps at 2 hours.
+Do not commit data files. Before stating any number, show the command that
+produced it.
