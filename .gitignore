@@ -20,3 +20,8 @@ results/counts_*
 *.faa
 results/step2*_hits.m8
 results/clusters_*
+results/eggnog/
+results/eggnog2/
+results/eggnog_test/
+results/pfam/
+*.emapper.*
