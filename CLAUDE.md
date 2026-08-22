@@ -1,199 +1,195 @@
-# Wood Frog Gut Protein Space (WF22 + WF23 + WF24)
+# Wood frog gut protein space: analysis record
 
-Extension of the v1 wood frog gut gene catalog (LsFMGC95) into a multi-year,
-multi-tier protein-space resource. Written 2026-08-21; APPEND-ONLY below this
-line except for documented full rewrites.
+This repository documents the construction of a non-redundant protein catalog
+from wood frog (*Lithobates sylvaticus*) faecal metagenomes collected across
+three years, and the analyses used to characterize that protein space: its size
+and saturation, the contribution of each cohort, the technical variables that
+drive apparent richness, and its functional annotation.
 
-## Status: Step 1 complete, Step 2 in progress
+## Sample set
 
-## What this project is
-LsFMGC95 v1 (NOT published; manuscript stage) clustered WF22 proteins at four
-identity tiers. This project adds the 45 sequenced WF23 + WF24 samples and
-reframes the work as a protein-space catalog: size, growth per cohort, unknown
-("dark") fraction, and novel protein families.
+89 faecal metagenomes from 64 animals. Faecal samples were collected weekly and
+pooled by month; each metagenome is one monthly pool from one animal, with stems
+named `<animal>.<timepoint>`.
 
-## Questions
-- Q1 How much of the wood frog gut protein space did v1 already capture?
-- Q2 What is the right multi-year catalog: incremental update or rebuild?
-- Q3 Does Basidiobolus treatment shift gene abundance in the new cohorts?
-- Q4 How do cohorts differ, separable from batch/platform? (descriptive only)
-- Q5 What are the novel/unknown proteins?
-- BLOCKED: maternal and temporal replication. Not testable in sequenced
-  WF23/24 (see Verified facts). Would require sequencing banked samples.
+| cohort | metagenomes | animals | structure |
+|--------|-------------|---------|-----------|
+| WF22 | 44 | 19 | multiple monthly pools per animal |
+| WF23 | 9 | 9 | one monthly pool per animal, same month |
+| WF24 | 36 | 36 | one monthly pool per animal |
 
-## Verified facts (all confirmed against source files)
-Samples (source: ncbi-deposit/results/deposit_classification_v2.tsv,
-year column is wf_year; classification is only WF-vs-wild):
-- WF22 50 stems / 19 animals, longitudinal (timepoints per animal: 1x4, 3x14, 4x1). 44 stems after the 6 exclusions listed below; the catalog was built from all 50, analyses use the 44.
+WF22 came from three egg masses with two *Basidiobolus* strains against control
+across three monthly timepoints; 6 of 50 metagenomes were excluded (one control
+with contaminating *Basidiobolus* reads, one on quality review, four animals that
+died before completing the experiment). WF23 sequenced animals are all egg mass
+3, 5 control against 4 UHM520.7734. WF24 sequenced animals are 33 egg mass 4 and
+3 egg mass 2, across 7 treatment codes with 5 animals each. Tank is confounded
+with egg mass in WF24.
 
-Design coverage of the SEQUENCED samples (45/45 joined to year databases):
-- WF23 sequenced: all 9 are egg_mass 3. Treatment 5 Control vs 4 UHM520.7734.
-- WF24 sequenced: 33 egg_mass 4, 3 egg_mass 2. Treatments balanced 5 x 7 codes.
-- Colonies DO span egg masses (WF23: EM1 16, EM2 9, EM3 15;
-  WF24: EM4 50, EM2 21, EM6 26, EM5 20, EM7 10) and WERE sampled longitudinally
-  (WF23 median 38 collection dates/animal; WF24 97/107 animals >=2 weeks),
-  but those samples are banked, not sequenced.
+## Steps
 
-v1 catalog tiers (counted from db/LsFMGC_AA_*_rep.fasta):
-- 100%: 7,545,340   95%: 5,055,108   90%: 4,547,337   50%: 2,495,918
-- Build: MMseqs2 13-45111, `mmseqs cluster --min-seq-id X -c 0.8 --cov-mode 1
-  --split-memory-limit 350G --kmer-per-seq 80`, on -p epyc --mem 384gb -c 96.
-- Gene prediction: Prodigal v2.6.3 -p meta on scaffolds/<stem>_R.fa.gz.
-- Headers: <stem>__<contig>_<n>, e.g. UHM20.35743__k141_103518_1
+### Step 1. Gene prediction and catalog input
 
-Step 1 outputs (this project):
-- 14 WF24 stems lacked predictions; all 14 predicted successfully 2026-08-21.
-- All 45 renamed to biosample-prefixed headers.
-- 24,151,134 proteins across the 45 new samples
-  (WF23 3,642,871 / 9 samples; WF24 20,508,263 / 36 samples).
-- Per-sample counts: results/step1_protein_counts_45.tsv
-- UHM585.41009 is a small outlier (313,220 proteins, 64 MB assembly).
+Per-sample assembled contigs are translated with Prodigal in metagenomic mode,
+and headers renamed so every protein carries its source metagenome. Predictions
+existed for 31 of the 45 WF23 and WF24 metagenomes; the remaining 14 were
+predicted with the same tool version and parameters.
 
-## Plan
-Step 0  DONE  Inventory: stems, timepoints, existing predictions, pipeline scripts
-Step 1  DONE  Gene prediction for 14 missing stems + rename all 45
-Step 2  NOW   Mapping-rate diagnostic: 200k-protein subsample vs LsFMGC_AA_95_rep
-              GATE: decide incremental update vs rebuild (with Open Issue 1)
-Step 3        Execute catalog strategy; produce multi-year catalog at 100/95/90/50
-Step 4        QC layer: % complete ORFs (partial flags), AntiFam screen,
-              host/diet/eukaryotic ORF classification, coverage sensitivity at -c 0.9
-Step 5        Annotation + AGNOSTOS classification (eggNOG, Pfam, KEGG, CAZy,
-              UniRef; DIAMOND e<=1e-5) -> K / KWP / GU / EU per cluster
-Step 6        Novel family calling: >=3 members from >=2 individuals, conserved
-              region >20 aa, length >=100 aa, no Pfam/eggNOG/UniRef hit,
-              AntiFam-clean, dN/dS<0.5 where computable
-Step 7        Structural annotation of novel reps: ESMFold -> pLDDT/pTM>0.7 ->
-              Foldseek vs PDB + AFDB + ESM Atlas (expect ~14-16% yield)
-Step 8        Abundance: bwa-mem2 + featureCounts, all 95 samples vs final catalog
-              -> prevalence, core/accessory, cohort sharing; treatment contrasts
-Step 9        Batch table for 95 stems (platform, run, depth). Parallel; required
-              before any cross-year claim.
-Step 10       Write-up. Figures: rarefaction per tier per cohort; cluster-size
-              distribution; known/unknown stacked bar; presence/absence heatmap;
-              cohort-sharing chord; novel-family showcase.
+**Main result.** 24,151,134 proteins from the 45 WF23 and WF24 metagenomes
+(WF23 3,642,871; WF24 20,508,263), joining 16,399,461 from the 44 WF22
+metagenomes for a catalog input of 40,550,595. Gene density per unit of
+assembled sequence is constant across prediction batches (median 4,580 proteins
+per Mb for pre-existing predictions against 4,602 for those predicted here,
+range 4,047 to 4,969), so the two runs are interchangeable. UHM585.41009 is a
+low outlier at 313,220 proteins from a 64 Mb assembly.
 
-## Key paths
-assemblies   /bigdata/stajichlab/shared/projects/Herptile/Metagenome/Fecal/results/<stem>/
-v1 catalog   /bigdata/stajichlab/shared/projects/Herptile/Metagenome/LsFMGC/v1/db/
-v1 pipeline  /bigdata/stajichlab/shared/projects/Herptile/Metagenome/LsFMGC/v1/pipeline/
-predictions  /bigdata/stajichlab/shared/projects/Herptile/Metagenome/Fecal/Proteins/by_assembly/
-year dbs     /bigdata/stajichlab/lshad003/ncbi-deposit/wf_databases/
-this project /bigdata/stajichlab/lshad003/wf_protein_space/
-python       /bigdata/stajichlab/lshad003/condaenvs/rf_py39/bin/python3
-cluster host lshad003@cluster.hpcc.ucr.edu
+| File | Purpose |
+|------|---------|
+| `scripts/step0_check_existing_predictions.sh` | Which metagenomes already had predictions |
+| `scripts/step0b_check_by_assembly.sh` | Per-stem inventory of existing protein files |
+| `scripts/step0c_locate_predict_script.sh` | Locate prediction pipeline, confirm tool version |
+| `scripts/step1b_preflight.sh` | Contig files confirmed for the 14 missing metagenomes |
+| `scripts/step1c_prodigal_array.sh` | Prodigal, 14 metagenomes |
+| `scripts/step1d_rename_45.sh` | Biosample-prefixed headers, all 45 |
+| `scripts/step1e_protein_counts.sh` | Per-sample protein counts against assembly size |
+
+Output: `results/step1_protein_counts_45.tsv`, `results/step0_by_assembly_check.tsv`
+
+### Step 2. Catalog construction
+
+All 40,550,595 proteins clustered at three amino-acid identity thresholds in one
+run. A database completeness check runs before clustering, after a truncated
+database was detected in an earlier attempt.
+
+**Main result.** 6,182,117 representatives at 95% identity, 5,361,227 at 90%,
+2,922,537 at 50%. Catalog is `catalog/db/LsPS_AA`.
+
+| File | Purpose |
+|------|---------|
+| `scripts/step2_cluster.sh` | Input assembly, database build, clustering at three tiers |
+| `scripts/step2a_preflight.sh` | Tool version, database format, disk headroom |
+
+Output: `catalog/db/LsPS_AA_{95,90,50}_rep.fasta`
+
+### Step 3. Search-based coverage of the earlier catalog
+
+A random subsample of new-cohort proteins is searched against the earlier
+WF22-only catalog to measure how much of the new protein space it already
+represented. A positive control of WF22 proteins, which built that catalog and
+must therefore be recovered, validates the search settings before the result is
+interpreted.
+
+**Main result.** Coverage mode determines the answer. Under target-side coverage the positive control recovered only 61.43% of proteins that are present in the catalog by construction, because short proteins cannot cover 80% of a longer representative; mapped proteins had median length 261 aa against 123 aa for unmapped. Under query-side coverage the control recovers 98.25%, and on that setting 46.15% of new-cohort proteins match the earlier catalog at gene level and 66.66% at family level.
+
+| File | Purpose |
+|---|---|
+| `scripts/step2c_diagnostic_epyc.sh` | Subsample search, gene-level tier |
+| `scripts/step2d_control_and_tiers.sh` | Positive control and family-level tier |
+| `scripts/step2e_covmode2.sh` | Coverage-mode comparison with control |
+
+### Step 4. Catalog composition and cluster support
+
+Every cluster is resolved into the cohorts its members come from, at each tier,
+before and after filters on cluster support. Singleton clusters are necessarily
+cohort-exclusive, so cohort sharing cannot be interpreted until they are removed.
+
+**Main result.** 55.27% of gene-level clusters are singletons. A support filter of at least three members from at least two metagenomes leaves 2,069,453 clusters, and cohort sharing rises sharply: clusters containing all three cohorts go from 6.71% to 20.06%, and at family level to 26.00%. Cluster size is heavily skewed, with the top 1% of family-level clusters holding 45.85% of all proteins.
+
+| File | Purpose |
+|---|---|
+| `scripts/step3_cluster_composition.sh` | Cluster membership tables and cohort composition |
+| `scripts/step4_nonsingleton.sh` | Composition under four support filters, size distribution |
+
+### Step 5. Cohort contribution at matched sampling effort
+
+Cohorts differ in metagenome count, so cohort-exclusive cluster counts partly
+measure sequencing effort rather than cohort identity. Cohorts are compared at
+equal numbers of metagenomes across repeated random draws.
+
+**Main result.** At 9 metagenomes per cohort across 10 draws, WF22-exclusive clusters fall from 15.12% to 9.26% once the sample-count advantage is removed, while WF24-exclusive remains 26.13% and clusters shared by all three cohorts are 24.22%. Per-cohort richness at 9 metagenomes is 765,122 clusters for WF22, 1,166,662 for WF23 and 2,331,079 for WF24, tracking per-sample protein yield rather than cohort identity.
+
+| File | Purpose |
+|---|---|
+| `scripts/step5_equaln_rarefaction.sh` | Equal-n cohort comparison and per-cohort accumulation |
+
+### Step 6. Batch structure
+
+Sequencing run, centre, platform and read depth are tabulated for all 89
+metagenomes, so that cohort comparisons can be checked against the batch
+structure they are confounded with.
+
+**Main result.** Sequencing runs are not fully confounded with cohort. WF23 and WF24 share one run, and WF24 spans two runs, which permits direct estimation of batch effects. Within the shared run WF23 and WF24 yield 422,857 and 415,208 proteins per metagenome, so cohort alone does not affect protein yield. Across its two runs WF24 yields 415,208 against 756,692 proteins per metagenome, a 1.8-fold difference on 1.24-fold more reads. The difference is assembly size rather than gene prediction, since gene density per Mb is constant across runs. WF22 occupies separate runs at two centres plus one AVITI run, so WF22 against new-cohort contrasts cannot be separated from batch.
+
+| File | Purpose |
+|---|---|
+| `scripts/step6a_inspect_qc.sh` | Read statistics format and run assignment |
+| `scripts/step6b_batch_table.sh` | Batch table and the two key contrasts |
+
+Output: `results/batch_table_89.tsv`
+
+### Step 7. Depth-normalized rarefaction
+
+Because assembled sequence per metagenome is the dominant technical variable,
+accumulation is measured against proteins sampled rather than metagenomes
+sampled, and WF24 is split by sequencing run so that cohort and run are not
+conflated.
+
+**Main result.** At 3,600,000 proteins WF22 gives 1,169,677 clusters and WF23 1,159,262, a 0.9% difference. WF24 gives 1,285,504 in one run and 1,687,560 in the other, so the same cohort differs by 31% across runs while different cohorts within one run differ by 11%. Sequencing run, not cohort, is the dominant driver of catalog richness. The pooled curve reaches 6,182,117 clusters at 40,550,595 proteins and is still adding roughly 435,000 clusters per 5 million proteins, so gene-level protein space is not saturated.
+
+| File | Purpose |
+|---|---|
+| `scripts/step7_rarefaction.sh` | Accumulation against proteins sampled, per cohort and pooled |
+| `scripts/step7b_wf24_byrun.sh` | Richness at matched depth, WF24 split by run |
+
+Output: `results/rarefaction_95.tsv`
+
+### Step 8. Functional annotation
+
+Gene-level representatives are annotated against eggNOG to establish the
+annotated and unannotated fractions of the catalog. The reference database is
+staged to node-local storage, since concurrent access to the shared copy stalls
+the annotation phase entirely. Annotation from a stored hits table fails in both
+available versions of the mapper, so every chunk is run end to end.
+
+| File | Purpose |
+|---|---|
+| `scripts/step8a_annot_preflight.sh` | Available tools, databases and reference invocations |
+| `scripts/step8e_test.sh` | Full run against hits-table reuse, two mapper versions |
+| `scripts/step8f_eggnog_v2.sh` | eggNOG annotation, database staged node-local |
+| `scripts/step8c_pfam_array.sh` | Pfam annotation |
+
+## Planned steps
+
+| Step | Description |
+|---|---|
+| 9 | Known and unknown fractions, unknowns split by whether they match sequenced genomes |
+| 10 | Quality control of unknowns: length, spurious-ORF screen, complete against partial calls |
+| 11 | Novel family calling on supported clusters with no database match |
+| 12 | Structure prediction and structure search for novel family representatives |
+| 13 | Taxonomic composition against read profiles |
+| 14 | Abundance across all 89 metagenomes; prevalence, core and accessory, treatment contrasts |
+
+## Software
+
+Prodigal V2.6.3, MMseqs2 13-45111, eggNOG-mapper 2.1.9 (eggNOG 5.0.2),
+HMMER 3.4 (Pfam), BBTools read statistics, Python 3.9 with NumPy 1.26.4.
+
+## Repository layout
+
+    scripts/   analysis and submission scripts
+    metadata/  sample lists and per-sample metadata
+    results/   summary tables
+    catalog/   protein catalog and databases, not tracked
+    logs/      job logs, not tracked
 
 ## Conventions
-Scripts as heredoc blocks in scripts/, run immediately. Full paths always.
-No find, no wget, no em-dashes. Python at the full conda path, never source activate.
-Verification-first: run a check, paste output, then advise. Never state a count
-as fact without a verified output file.
-MMseqs2 MUST be pinned to 13-45111 (bare `module load mmseqs2` gives 17).
-MMseqs2 jobs MUST use -p epyc (crashes with Illegal instruction on some nodes).
-/bigdata was 98% full on 2026-08-21; check space before large jobs.
-md files are append-only; wrong analyses are marked corrected with a date, never deleted.
 
-## WF22 analysis set (v1 manuscript)
-50 WF22 samples were collected and used to build the v1 catalog; 44 passed
-review and carried into abundance and statistical analyses.
-
-Six exclusions:
-
-| sample | reason |
-|--------|--------|
-| UHM56.10839  | anomalously high Basidiobolus reads in a control (3.09%) |
-| UHM102.35765 | post-sequencing quality review |
-| UHM27.10829  | animal died before completing the 3-month experiment |
-| UHM33.10831  | animal died before completing the 3-month experiment |
-| UHM43.10836  | animal died before completing the 3-month experiment |
-| UHM44.10837  | animal died before completing the 3-month experiment |
-
-Final analysis set: 44 samples (EM1 8, EM2 9, EM3 27). EM3 is larger because
-it received both Basidiobolus strains (STP1717.1 and STP1710.7) plus controls.
-
-Note for the extension: catalog construction and abundance analysis use
-different sample sets. Any catalog-level count refers to the build set;
-any abundance or statistical result refers to the analysis set.
-
-## Sample structure
-Fecal samples were collected weekly and pooled by month. Each sequenced
-metagenome is one monthly pool for one animal. The stem is
-<animal>.<timepoint>, so UHM20.10828, UHM20.35743 and UHM20.35744 are three
-consecutive monthly pools from animal UHM20.
-
-- WF22: 50 metagenomes from 19 animals, multiple monthly pools per animal
-  (4 animals with 1, 14 with 3, 1 with 4). Supports within-animal comparison
-  across development.
-- WF23: 9 metagenomes from 9 animals, one monthly pool each, all from the
-  same month.
-- WF24: 36 metagenomes from 36 animals, one monthly pool each.
-
-Remaining monthly pools for the WF23 and WF24 animals are banked.
-
-## Catalog built 2026-08-21
-89 metagenomes (44 WF22 + 9 WF23 + 36 WF24), 40,550,595 input proteins.
-MMseqs2 13-45111, `mmseqs cluster -c 0.8 --cov-mode 1 --kmer-per-seq 80`.
-
-| tier | representatives |
-|------|-----------------|
-| 95%  | 6,182,117 |
-| 90%  | 5,361,227 |
-| 50%  | 2,922,537 |
-
-The 100% tier was not built. Database: catalog/db/LsPS_AA
-Script: scripts/step2_cluster.sh
-
-## Catalog composition (2026-08-21)
-
-Cluster quality filtering matters: 55.27% of 95% tier clusters are singletons.
-Applying a FESNov-style filter (>=3 members from >=2 samples) leaves 2,069,453
-clusters (33.5%), and cohort sharing rises sharply: clusters shared by all three
-cohorts go from 6.71% to 20.06%.
-
-Equal-n comparison (9 samples per cohort, 10 random draws, filtered clusters,
-mean 1,058,777 per draw): WF24-only 26.13%, all three 24.22%, WF22+WF23 13.74%,
-WF23+WF24 12.36%, WF22-only 9.26%, WF22+WF24 7.45%, WF23-only 6.83%.
-WF22-only falls from 15.12% to 9.26% once its sample-count advantage is removed.
-
-Per-sample richness at 9 samples: WF22 765,122 clusters, WF23 1,166,662,
-WF24 2,331,079. Tracks per-sample protein yield, so depth must be controlled
-before any biological interpretation.
-
-Pooled rarefaction (95% tier, 3 permutations): 1 sample ~400k clusters,
-50 samples ~4.4M, 89 samples 6,182,117, still rising ~350k per 10 samples.
-Gene-level protein space is not saturated.
-
-Cluster size distribution, 50% tier: top 1% of clusters hold 45.85% of proteins
-(comparable to GMGC's 0.6% of families holding 50% of genes).
-
-Scripts: step3_cluster_composition.sh, step4_nonsingleton.sh,
-step5_equaln_rarefaction.sh
-
-## Batch structure and technical variation (2026-08-21)
-Table: results/batch_table_89.tsv (89 rows, no missing values)
-
-Sequencing runs are not fully confounded with cohort. WF23 and WF24 share run
-UCB_20250426_M005990, and WF24 spans two runs, which permits direct estimation
-of batch effects. WF22 occupies separate runs at two centers (UCB, UCD) plus one
-AVITI run, so WF22 vs new-cohort contrasts cannot be separated from batch.
-
-Median clean reads / median proteins per sample:
-- WF22 195.1M / 355,061; WF23 244.3M / 422,857; WF24 233.5M / 509,171
-
-Contrast 1, same run (UCB_20250426_M005990): WF23 422,857 proteins vs WF24
-415,208. Cohort alone does not affect protein yield.
-
-Contrast 2, WF24 across runs: UCB_20250426 415,208 proteins vs UCB_20250730
-756,692, a 1.8x difference on only 1.24x more reads.
-
-Cause is assembly size, not gene prediction: proteins per MB of assembled contigs
-is constant across all 45 new samples (median 4,580 for pre-existing predictions,
-4,602 for those predicted in 2026; 4,615 vs 4,602 by sequencing run; range
-4,047-4,969).
-
-Consequence: per-sample cluster richness tracks assembled sequence per sample.
-Differences in rarefaction between cohorts reflect assembly yield and cannot be
-interpreted as biological diversity without depth normalization.
-Script: scripts/step6b_batch_table.sh
+No count is stated without the output file that produced it. MMseqs2 is pinned
+to 13-45111 and runs only on the epyc partition, since other nodes fail with an
+illegal instruction. Coverage mode is stated explicitly for every search, since
+it changes recovery by more than thirty percentage points. Cluster-level claims
+are made on support-filtered clusters, and cohort comparisons at matched
+sampling effort.
 
 ## INSTRUCTIONS FOR CLAUDE CODE
 Execute one step per session, the one named. After its checks pass, append a
