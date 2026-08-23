@@ -1,34 +1,29 @@
 # CLAUDE.md - operating rules for this project
+# State lives in CHATINDEX.md, the analysis record in README.md, history in
+# PROJECT_LOG.md. Read CHATINDEX.md first; do not re-derive settled questions.
 
-State lives in CHATINDEX.md (append-only, newest block wins, a claim named in a
-SUPERSEDES line is dead). The analysis record is README.md. History is
-PROJECT_LOG.md. Read CHATINDEX.md first and do not re-derive settled questions.
-
-## Cluster facts
+## Cluster
 - python: /bigdata/stajichlab/lshad003/condaenvs/rf_py39/bin/python3, never source activate
-- partitions: epyc and stajichlab allow 30 days, short caps at 2 hours
-- MMseqs2 pinned to 13-45111; bare `module load mmseqs2` gives version 17
+- partitions: epyc and stajichlab are 30 days, short is 2 hours only
+- MMseqs2 pinned to 13-45111; bare `module load mmseqs2` gives 17
 - MMseqs2 runs only on -p epyc; other nodes fail with an illegal instruction
 - large reference databases must be staged to node-local /scratch or concurrent
-  tasks stall: eggNOG is 48 GB, Pfam 38.2 is 4.7 GB
-- emapper --annotate_hits_table returns zero rows in both 2.1.9 and 2.1.7, so
-  every chunk runs end to end
-- Pfam uses hmmsearch, not hmmscan: 78 minutes per 10,000-protein chunk against
-  about 6 minutes. Their table column orders differ.
+  tasks stall; this applies to eggNOG (48 GB) and Pfam (4.7 GB)
+- emapper --annotate_hits_table returns zero rows in 2.1.9 and 2.1.7; every
+  chunk must run end to end
+- Pfam: use hmmsearch, not hmmscan. hmmscan measured 78 min per 10k chunk
+  against about 6 min for hmmsearch. Column order differs between them.
 
 ## Method rules
-- coverage mode is stated explicitly for every search; searches use --cov-mode 2
-- cluster-level claims are made on support-filtered clusters, not raw clusters
+- coverage mode is stated explicitly for every search; --cov-mode 2 for searches
+- cluster-level claims are made on support-filtered clusters
 - cohort comparisons are made at matched sampling effort and checked against
-  sequencing run before interpretation
-- no number is stated without the current output file behind it
-- any count that depends on a threshold is reported with its criterion
-- a selection criterion is never reported as a finding
+  sequencing run
+- no count is stated without the output file behind it
+- a count that depends on a threshold is reported with its criterion
 
 ## Working conventions
-- scripts as ready-to-run heredocs written into scripts/, full paths always
+- scripts as ready-to-run heredocs into scripts/, full paths always
 - no find, no wget, no set -euo pipefail, no em-dashes
-- .md files are append-only unless a full rewrite is explicitly requested
+- .md files are append-only except on an explicit request for a rewrite
 - data files are never committed; .gitignore is a whitelist
-- one topic per chat; end each substantive chat with an append block for
-  CHATINDEX.md and a one-line append to PROJECT_LOG.md
