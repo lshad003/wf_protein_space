@@ -156,18 +156,66 @@ available versions of the mapper, so every chunk is run end to end.
 | `scripts/step8a_annot_preflight.sh` | Available tools, databases and reference invocations |
 | `scripts/step8e_test.sh` | Full run against hits-table reuse, two mapper versions |
 | `scripts/step8f_eggnog_v2.sh` | eggNOG annotation, database staged node-local |
-| `scripts/step8c_pfam_array.sh` | Pfam annotation |
+| `scripts/step12b_pfam_hmmsearch.sh` | Pfam annotation via hmmsearch |
+
+### Step 9. Open reading frame completeness
+
+Prodigal records whether each predicted protein runs to a start and a stop codon
+or is truncated at a contig edge. These flags are read from the original
+per-sample protein files, since the renaming step removed them, and completeness
+is reported for the catalog as a whole, for the representatives, and against
+cluster size.
+
+**Main result.** 46.91% of the 40,550,595 predicted proteins are complete open reading frames, within the range reported for other gut gene catalogs. Completeness of the 95% representatives is lower at 35.28%, and rises monotonically with cluster size: 11.48% for singletons, 33.13% for clusters of two, 61.07% for three to five, 81.94% for six to twenty, and 86.14% for twenty-one or more. Singleton clusters are therefore dominated by contig-edge fragments rather than by rare or novel proteins, since a gene broken across contigs yields fragments that cannot cluster with the intact sequence. This supports treating the support-filtered set of 2,069,453 clusters as the analytical catalog, and means that continued accumulation in the rarefaction curve partly reflects fragment accumulation rather than gene discovery.
+
+| File | Purpose |
+|---|---|
+| `scripts/step9_orf_completeness.sh` | Partial flags extracted, completeness against cluster size |
+
+Output: `results/orf_completeness.tsv`
+
+### Step 10. Functional annotation and the unannotated fraction
+
+The 6,182,117 gene-level representatives are annotated against eggNOG, and the
+annotated fraction is examined against cluster size and against open reading
+frame completeness. Annotation is then rolled up to the 50% family tier, where
+support filters are applied so that the unannotated fraction is comparable to
+published catalogs.
+
+**Main result.** 48.27% of gene-level representatives carry an eggNOG assignment, closely matching the 47.2% obtained for the earlier WF22-only catalog on the same database. Annotation rises with cluster support, from 36.79% for singletons to 90.51% for clusters of twenty-one or more. Annotation does not track open reading frame completeness in the expected direction: within every cluster-size bin below twenty-one members, proteins spanning an entire short contig annotate better than complete open reading frames (65.1% against 40.1% among singletons), so the partial flag is not a proxy for sequence quality and discarding partial calls would preferentially remove well-characterized sequence. At the 50% family tier, 76.01% of all families have no annotated member; after requiring at least three members from at least two metagenomes this falls to 55.35% of 1,022,162 families, and requiring three metagenomes changes it by less than 0.1 percentage points. The supported unannotated fraction is therefore stable at roughly 55%, higher than reported for the global microbial gene catalog, the ocean microbial reference gene catalog, or the AGNOSTOS gene-cluster classification, leaving 565,769 supported unannotated families as candidates for novel family calling.
+
+| File | Purpose |
+|---|---|
+| `scripts/step8f_eggnog_v2.sh` | eggNOG annotation, database staged node-local |
+| `scripts/step10_annotation_summary.sh` | Annotated fraction by cluster size and completeness |
+| `scripts/step11_interaction_and_supported.sh` | Completeness within cluster size, family-tier dark fraction under support filters |
+
+Output: `results/annotation_summary.tsv`, `results/family_dark_fraction.tsv`
+
+### Step 11. Taxonomic composition of the annotated fraction
+
+Broad clade is read from the eggNOG orthologous group assignments of the
+annotated representatives, and examined against cluster size, since host and
+dietary sequence would be expected to concentrate in poorly supported clusters.
+
+**Main result.** The annotated fraction is overwhelmingly bacterial: 92.64% Bacteria, 6.93% Eukaryota, 0.27% Archaea and 0.16% Viruses of 2,984,013 annotated representatives. The most frequent assignment levels are Alphaproteobacteria 16.30%, Bacteroidetes 13.94%, Actinobacteria 13.34%, Gammaproteobacteria 11.44% and Betaproteobacteria 10.31%, with Metazoa at 3.04% and Fungi at 2.57%. Eukaryotic assignment declines with cluster support, from 7.64% among singletons to 3.59% among clusters of twenty-one or more, consistent with host and dietary sequence being present but sparse and poorly replicated. This applies to annotated proteins only; the unannotated fraction carries no taxonomic assignment and its composition is not established by this analysis.
+
+| File | Purpose |
+|---|---|
+| `scripts/step13_taxonomy.sh` | Broad clade and assignment level, against cluster size |
+
+Output: `results/taxonomy_summary.tsv`
 
 ## Planned steps
 
 | Step | Description |
 |---|---|
-| 9 | Known and unknown fractions, unknowns split by whether they match sequenced genomes |
-| 10 | Quality control of unknowns: length, spurious-ORF screen, complete against partial calls |
-| 11 | Novel family calling on supported clusters with no database match |
-| 12 | Structure prediction and structure search for novel family representatives |
-| 13 | Taxonomic composition against read profiles |
-| 14 | Abundance across all 89 metagenomes; prevalence, core and accessory, treatment contrasts |
+| 12 | Pfam domain assignment and the union of eggNOG and Pfam coverage |
+| 13 | Four-way split: known with domain, known without domain, genomic unknown, environmental unknown |
+| 14 | Novel family calling on supported clusters with no database match |
+| 15 | Structure prediction and structure search for novel family representatives |
+| 16 | Abundance across all 89 metagenomes; prevalence, core and accessory |
+| 17 | Treatment contrasts within cohort |
 
 ## Software
 
@@ -208,35 +256,3 @@ sampling effort.
    matches, and exclusion of contig-edge fragments.
 6. Language: cohort-associated or cohort-restricted protein space, never
    cohort-specific biology or year-driven expansion.
-
-### Step 10. Functional annotation and the unannotated fraction
-
-The 6,182,117 gene-level representatives are annotated against eggNOG, and the
-annotated fraction is examined against cluster size and against open reading
-frame completeness. Annotation is then rolled up to the 50% family tier, where
-support filters are applied so that the unannotated fraction is comparable to
-published catalogs.
-
-**Main result.** 48.27% of gene-level representatives carry an eggNOG assignment, closely matching the 47.2% obtained for the earlier WF22-only catalog on the same database. Annotation rises with cluster support, from 36.79% for singletons to 90.51% for clusters of twenty-one or more. Annotation does not track open reading frame completeness in the expected direction: within every cluster-size bin below twenty-one members, proteins spanning an entire short contig annotate better than complete open reading frames (65.1% against 40.1% among singletons), so the partial flag is not a proxy for sequence quality and discarding partial calls would preferentially remove well-characterized sequence. At the 50% family tier, 76.01% of all families have no annotated member; after requiring at least three members from at least two metagenomes this falls to 55.35% of 1,022,162 families, and requiring three metagenomes changes it by less than 0.1 percentage points. The supported unannotated fraction is therefore stable at roughly 55%, higher than reported for the global microbial gene catalog, the ocean microbial reference gene catalog, or the AGNOSTOS gene-cluster classification, leaving 565,769 supported unannotated families as candidates for novel family calling.
-
-| File | Purpose |
-|---|---|
-| `scripts/step8f_eggnog_v2.sh` | eggNOG annotation, database staged node-local |
-| `scripts/step10_annotation_summary.sh` | Annotated fraction by cluster size and completeness |
-| `scripts/step11_interaction_and_supported.sh` | Completeness within cluster size, family-tier dark fraction under support filters |
-
-Output: `results/annotation_summary.tsv`, `results/family_dark_fraction.tsv`
-
-### Step 11. Taxonomic composition of the annotated fraction
-
-Broad clade is read from the eggNOG orthologous group assignments of the
-annotated representatives, and examined against cluster size, since host and
-dietary sequence would be expected to concentrate in poorly supported clusters.
-
-**Main result.** The annotated fraction is overwhelmingly bacterial: 92.64% Bacteria, 6.93% Eukaryota, 0.27% Archaea and 0.16% Viruses of 2,984,013 annotated representatives. The most frequent assignment levels are Alphaproteobacteria 16.30%, Bacteroidetes 13.94%, Actinobacteria 13.34%, Gammaproteobacteria 11.44% and Betaproteobacteria 10.31%, with Metazoa at 3.04% and Fungi at 2.57%. Eukaryotic assignment declines with cluster support, from 7.64% among singletons to 3.59% among clusters of twenty-one or more, consistent with host and dietary sequence being present but sparse and poorly replicated. This applies to annotated proteins only; the unannotated fraction carries no taxonomic assignment and its composition is not established by this analysis.
-
-| File | Purpose |
-|---|---|
-| `scripts/step13_taxonomy.sh` | Broad clade and assignment level, against cluster size |
-
-Output: `results/taxonomy_summary.tsv`
