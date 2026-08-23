@@ -25,3 +25,6 @@ results/eggnog2/
 results/eggnog_test/
 results/pfam/
 *.emapper.*
+results/pfam_hs/
+*.domtblout
+*.tblout
