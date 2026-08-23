@@ -226,3 +226,17 @@ published catalogs.
 | `scripts/step11_interaction_and_supported.sh` | Completeness within cluster size, family-tier dark fraction under support filters |
 
 Output: `results/annotation_summary.tsv`, `results/family_dark_fraction.tsv`
+
+### Step 11. Taxonomic composition of the annotated fraction
+
+Broad clade is read from the eggNOG orthologous group assignments of the
+annotated representatives, and examined against cluster size, since host and
+dietary sequence would be expected to concentrate in poorly supported clusters.
+
+**Main result.** The annotated fraction is overwhelmingly bacterial: 92.64% Bacteria, 6.93% Eukaryota, 0.27% Archaea and 0.16% Viruses of 2,984,013 annotated representatives. The most frequent assignment levels are Alphaproteobacteria 16.30%, Bacteroidetes 13.94%, Actinobacteria 13.34%, Gammaproteobacteria 11.44% and Betaproteobacteria 10.31%, with Metazoa at 3.04% and Fungi at 2.57%. Eukaryotic assignment declines with cluster support, from 7.64% among singletons to 3.59% among clusters of twenty-one or more, consistent with host and dietary sequence being present but sparse and poorly replicated. This applies to annotated proteins only; the unannotated fraction carries no taxonomic assignment and its composition is not established by this analysis.
+
+| File | Purpose |
+|---|---|
+| `scripts/step13_taxonomy.sh` | Broad clade and assignment level, against cluster size |
+
+Output: `results/taxonomy_summary.tsv`
