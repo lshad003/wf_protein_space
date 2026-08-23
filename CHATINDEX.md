@@ -63,3 +63,52 @@
   output results/pfam_hs, ~15h remaining.
 - NEXT: eggNOG+Pfam union, AGNOSTOS four-way split, then abundance on the
   support-filtered catalog and within-cohort treatment contrasts.
+
+# ==============================================================
+# From here on this file is CHATINDEX.md: append-only current state.
+# Newest block wins. A claim named in a SUPERSEDES line is dead.
+# Everything above is the earlier chat_index and is preserved as history.
+# ==============================================================
+
+## 2026-08-23 catalog build through annotation
+
+VERIFIED (file path behind each number)
+- Catalog: 89 metagenomes (44 WF22 + 9 WF23 + 36 WF24), 40,550,595 input proteins.
+  Tiers 6,182,117 at 95%, 5,361,227 at 90%, 2,922,537 at 50%.
+  catalog/db/LsPS_AA_{95,90,50}_rep.fasta
+- Gene density constant across prediction batches, about 4,600 proteins per Mb.
+  results/step1_protein_counts_45.tsv
+- Searches require --cov-mode 2. WF22 positive control recovers 98.25% against
+  61.43% under --cov-mode 1. logs/step2e.*.log
+- 55.27% of gene-level clusters are singletons. Support filter (>=3 members from
+  >=2 metagenomes) leaves 2,069,453 clusters and raises three-cohort sharing from
+  6.71% to 20.06%. logs/step4.*.log
+- Sequencing run outweighs cohort: same cohort across two runs differs 31% at
+  matched depth, different cohorts within one run differ 11%.
+  results/batch_table_89.tsv, results/rarefaction_95.tsv
+- ORF completeness 46.91% overall, 35.28% of representatives, rising from 11.48%
+  in singletons to 86.14% at 21+ members. results/orf_completeness.tsv
+- eggNOG 48.27% of representatives annotated. Family-tier dark fraction 76.01%
+  raw, 55.35% after support filtering across 1,022,162 families.
+  results/annotation_summary.tsv, results/family_dark_fraction.tsv
+- Annotated fraction is 92.64% Bacteria, 6.93% Eukaryota, 0.27% Archaea,
+  0.16% Viruses. results/taxonomy_summary.tsv
+
+SUPERSEDES
+- Dead claim: "WF23 and WF24 are single timepoint per animal." Animals were
+  sampled weekly and pooled monthly; one monthly pool per animal was sequenced
+  while the rest are banked. Corrected 2026-08-21 from the year databases.
+- Dead claim: "WF24 is genuinely 30% richer at matched depth." That difference is
+  carried by sequencing run, not cohort. Corrected 2026-08-21 by
+  results/rarefaction_95.tsv and logs/step7b.*.log.
+
+NOT YET TRUSTWORTHY
+- Pfam (results/pfam_hs) was still running when this block was written, jobs
+  27712560 and 27712562. Quote no Pfam coverage number until 619 .done files exist.
+- The composition of the unannotated 51.73% is unknown. The taxonomy result covers
+  annotated proteins only and must not be extended to the dark fraction.
+
+NEXT STEP
+Union of eggNOG and Pfam coverage, then the four-way known-with-domain,
+known-without-domain, genomic-unknown, environmental-unknown split, then abundance
+on the support-filtered catalog.
