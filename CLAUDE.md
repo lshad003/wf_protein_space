@@ -208,3 +208,21 @@ sampling effort.
    matches, and exclusion of contig-edge fragments.
 6. Language: cohort-associated or cohort-restricted protein space, never
    cohort-specific biology or year-driven expansion.
+
+### Step 10. Functional annotation and the unannotated fraction
+
+The 6,182,117 gene-level representatives are annotated against eggNOG, and the
+annotated fraction is examined against cluster size and against open reading
+frame completeness. Annotation is then rolled up to the 50% family tier, where
+support filters are applied so that the unannotated fraction is comparable to
+published catalogs.
+
+**Main result.** 48.27% of gene-level representatives carry an eggNOG assignment, closely matching the 47.2% obtained for the earlier WF22-only catalog on the same database. Annotation rises with cluster support, from 36.79% for singletons to 90.51% for clusters of twenty-one or more. Annotation does not track open reading frame completeness in the expected direction: within every cluster-size bin below twenty-one members, proteins spanning an entire short contig annotate better than complete open reading frames (65.1% against 40.1% among singletons), so the partial flag is not a proxy for sequence quality and discarding partial calls would preferentially remove well-characterized sequence. At the 50% family tier, 76.01% of all families have no annotated member; after requiring at least three members from at least two metagenomes this falls to 55.35% of 1,022,162 families, and requiring three metagenomes changes it by less than 0.1 percentage points. The supported unannotated fraction is therefore stable at roughly 55%, higher than reported for the global microbial gene catalog, the ocean microbial reference gene catalog, or the AGNOSTOS gene-cluster classification, leaving 565,769 supported unannotated families as candidates for novel family calling.
+
+| File | Purpose |
+|---|---|
+| `scripts/step8f_eggnog_v2.sh` | eggNOG annotation, database staged node-local |
+| `scripts/step10_annotation_summary.sh` | Annotated fraction by cluster size and completeness |
+| `scripts/step11_interaction_and_supported.sh` | Completeness within cluster size, family-tier dark fraction under support filters |
+
+Output: `results/annotation_summary.tsv`, `results/family_dark_fraction.tsv`

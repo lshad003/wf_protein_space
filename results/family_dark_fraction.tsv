@@ -1,0 +1,5 @@
+filter	families	annotated	pct_annotated	pct_unannotated
+all families	2922537	701060	23.99	76.01
+>=2 members	1400764	526456	37.58	62.42
+>=3 members and >=2 metagenomes	1022162	456393	44.65	55.35
+>=3 members and >=3 metagenomes	1004781	448717	44.66	55.34
