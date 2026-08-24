@@ -1,0 +1,13 @@
+class	code	label	n
+K	00	complete	1068993
+K	10	no start	114299
+K	01	no stop	104294
+K	11	both missing	56817
+KWP	00	complete	96826
+KWP	10	no start	16556
+KWP	01	no stop	14759
+KWP	11	both missing	10694
+U	00	complete	392427
+U	10	no start	86562
+U	01	no stop	80530
+U	11	both missing	26696

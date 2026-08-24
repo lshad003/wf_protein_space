@@ -11,3 +11,9 @@ results/*
 !results/*.tsv
 # large intermediates that are tsv but must stay out
 results/clusters_*.tsv
+# per-gene tables, too large for the repo
+results/rep_classes.tsv
+results/completeness_reps.tsv
+results/supported_cds_lengths.tsv
+results/step13_nrclust20260128_hits.tsv
+results/antifam_hits.tblout

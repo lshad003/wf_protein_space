@@ -1,0 +1,4 @@
+# eggNOG hit = any emapper assignment; Pfam hit = tblout under --cut_ga
+scope	total	eggnog	pfam	both	union	neither
+all_reps	6182117	2984013	2713156	2469885	3227284	2954833
+supported	2069453	1416052	1344403	1277217	1483238	586215

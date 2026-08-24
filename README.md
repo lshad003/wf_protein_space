@@ -206,6 +206,46 @@ dietary sequence would be expected to concentrate in poorly supported clusters.
 
 Output: `results/taxonomy_summary.tsv`
 
+### Step 12. eggNOG and Pfam union
+
+Pfam assigned with hmmsearch --cut_ga, 619/619 chunks. Of 6,182,117
+representatives: eggNOG 2,984,013 (48.27%), Pfam 2,713,156 (43.89%),
+union 3,227,284 (52.20%). Supported set: known 1,483,238 (71.67%),
+unknown 586,215 (28.33%). At the 50% family tier the supported dark
+fraction falls from 55.35% (eggNOG only) to 51.42% under the union.
+Per-representative classes written to results/rep_classes.tsv:
+K 1,344,403, KWP 138,835, U 586,215 (supported). DUF/UPF-only K
+representatives 76,589, so strict K is 1,267,814.
+Outputs: results/union_rep_level.tsv, family_union_dark.tsv,
+rep_classes.tsv, known_union_ids.txt.
+
+### Step 16. Abundance across 89 metagenomes
+
+Reference is the supported representatives only (2,069,453 CDS,
+1,750,474,248 bp, mean 845.9), indexed with bwa-mem2 2.3. Reads resolved
+through Fecal/read_manifest.csv, 89 of 89 matched with distinct R1 and R2.
+Counting keeps two criteria per gene, primary mapped reads and the
+MAPQ >= 10 subset, with no BAM written. Mapped fraction by cohort:
+WF22 0.9587, WF23 0.9634, WF24 0.9671. Column sums of both matrices match
+the per-sample summaries for all 89 samples.
+Outputs: results/count_matrix_primary.tsv.gz, count_matrix_mapq10.tsv.gz,
+mapping_qc_89.tsv, prevalence_primary.tsv.gz, dark_abundance_by_sample.tsv.
+
+### Step 19. Characterization of the unknown fraction
+
+Unknown genes are widespread: 82.9% occur in more than 20 of 89 samples and
+3,471 occur in all 89. They are short, mean 402 bp against 1,045 for known
+genes, and this is not fragmentation: 66.9% are complete ORFs and the mean
+length of complete genes only is 405 bp. They account for 7.03% of raw
+mapped reads and 19.28% after length normalization. An AntiFam v6.0 screen
+flagged 1,477 of 586,215 as spurious (0.2520%). By collection year,
+497,044 unknown genes occur in all three years and carry 91.18% of unknown
+gene reads, while the 18,914 single-year genes are shorter (246 bp) and
+carry 1.22%.
+Outputs: results/completeness_by_class.tsv, antifam_hits.tblout,
+core_unknown_by_years.tsv.gz, fig_prevalence_by_class.png,
+fig_dark_abundance.png.
+
 ## Planned steps
 
 | Step | Description |

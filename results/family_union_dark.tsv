@@ -1,0 +1,5 @@
+# known: any member in eggNOG set (egg cols) or eggNOG+Pfam union (union cols)
+# support: >=3 members from >=2 metagenomes, 50%% tier
+scope	families	egg_known	egg_dark	union_known	union_dark
+all	2922537	701060	2221477	803357	2119180
+supported	1022162	456393	565769	496605	525557
