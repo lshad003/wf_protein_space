@@ -206,45 +206,282 @@ dietary sequence would be expected to concentrate in poorly supported clusters.
 
 Output: `results/taxonomy_summary.tsv`
 
-### Step 12. eggNOG and Pfam union
+### Step 12. Annotation coverage and the four-way classification
 
-Pfam assigned with hmmsearch --cut_ga, 619/619 chunks. Of 6,182,117
-representatives: eggNOG 2,984,013 (48.27%), Pfam 2,713,156 (43.89%),
-union 3,227,284 (52.20%). Supported set: known 1,483,238 (71.67%),
-unknown 586,215 (28.33%). At the 50% family tier the supported dark
-fraction falls from 55.35% (eggNOG only) to 51.42% under the union.
-Per-representative classes written to results/rep_classes.tsv:
-K 1,344,403, KWP 138,835, U 586,215 (supported). DUF/UPF-only K
-representatives 76,589, so strict K is 1,267,814.
-Outputs: results/union_rep_level.tsv, family_union_dark.tsv,
-rep_classes.tsv, known_union_ids.txt.
+Two annotation sources are combined before any dark fraction is quoted, since
+eggNOG alone overstates it. Pfam is assigned with hmmsearch under gathering
+thresholds, which fixes the criterion without a chosen E-value. The union then
+defines what counts as known, and everything unknown is carried forward.
 
-### Step 16. Abundance across 89 metagenomes
+**Coverage.** Of 6,182,117 representatives, eggNOG annotates 2,984,013
+(48.27%), Pfam 2,713,156 (43.89%), and their union 3,227,284 (52.20%). Within
+the support-filtered set of 2,069,453, the union leaves 586,215 unannotated
+(28.33%). At the 50% family tier the supported dark fraction falls from 55.35%
+under eggNOG alone to 51.42% under the union, so about four points of the
+earlier figure were an artefact of using one database.
 
-Reference is the supported representatives only (2,069,453 CDS,
-1,750,474,248 bp, mean 845.9), indexed with bwa-mem2 2.3. Reads resolved
-through Fecal/read_manifest.csv, 89 of 89 matched with distinct R1 and R2.
-Counting keeps two criteria per gene, primary mapped reads and the
-MAPQ >= 10 subset, with no BAM written. Mapped fraction by cohort:
-WF22 0.9587, WF23 0.9634, WF24 0.9671. Column sums of both matrices match
-the per-sample summaries for all 89 samples.
-Outputs: results/count_matrix_primary.tsv.gz, count_matrix_mapq10.tsv.gz,
-mapping_qc_89.tsv, prevalence_primary.tsv.gz, dark_abundance_by_sample.tsv.
+**Classes.** Representatives are labelled K if they carry a Pfam domain,
+KWP if eggNOG assigns them but Pfam does not, and U if neither does. Supported
+counts are K 1,344,403, KWP 138,835, U 586,215. Of the K representatives,
+76,589 carry only DUF or UPF domains, which a stricter definition would move
+out of K, leaving 1,267,814.
 
-### Step 19. Characterization of the unknown fraction
+| File | Purpose |
+|---|---|
+| scripts/step12c_check_pfam_done.sh | Pfam completion verified before any Pfam number is used |
+| scripts/step12d_union_replevel.sh | Representative-level union of eggNOG and Pfam |
+| scripts/step12e_family_union.py | Union carried to the 50% family tier |
+| scripts/step12f_rep_classes.sh | Per-representative K, KWP and U labels with the DUF split |
 
-Unknown genes are widespread: 82.9% occur in more than 20 of 89 samples and
-3,471 occur in all 89. They are short, mean 402 bp against 1,045 for known
-genes, and this is not fragmentation: 66.9% are complete ORFs and the mean
-length of complete genes only is 405 bp. They account for 7.03% of raw
-mapped reads and 19.28% after length normalization. An AntiFam v6.0 screen
-flagged 1,477 of 586,215 as spurious (0.2520%). By collection year,
-497,044 unknown genes occur in all three years and carry 91.18% of unknown
-gene reads, while the 18,914 single-year genes are shorter (246 bp) and
-carry 1.22%.
-Outputs: results/completeness_by_class.tsv, antifam_hits.tblout,
-core_unknown_by_years.tsv.gz, fig_prevalence_by_class.png,
-fig_dark_abundance.png.
+Output: results/union_rep_level.tsv, results/family_union_dark.tsv,
+results/rep_classes.tsv, results/known_union_ids.txt
+
+### Step 13. Genomic and environmental unknowns
+
+The unannotated representatives are searched against NCBI ClusteredNR to
+separate genes that exist in sequenced genomes but have no assigned function
+from genes that appear nowhere. The database is hard-coded after inspecting it
+with dbinfo rather than selected by a glob, because the database defines the
+boundary being reported. Hits are recorded loosely and the criterion is applied
+afterwards, so alternatives can be compared without repeating the search.
+
+**The search.** 586,215 supported unknown representatives against
+nr_cluster_seq 20260128 (470,748,714 sequences) with DIAMOND 2.1.24
+--very-sensitive, recording up to five targets per query at E <= 1e-3.
+Thirteen hours on 32 cores with the database staged to node-local scratch.
+
+**The criterion matters.** Loose to strict, the environmental unknown count
+runs 374,503 (63.88%) at E <= 1e-5 with no coverage requirement, 430,833
+(73.49%) at E <= 1e-10 with query and subject coverage at least 50%, and
+449,170 (76.62%) at E <= 1e-20 under the same coverage. The middle criterion
+is adopted, since coverage on both sides prevents a short shared motif from
+counting as a match.
+
+**Main result.** Of the supported catalogue, 430,831 representatives (20.82%)
+have no hit in a database of 470 million proteins. The genomic unknowns,
+155,384 representatives (7.51%), mostly match sequences that are themselves
+labelled hypothetical, so they are recognised without being characterised.
+Mobile element titles account for 3,954 of the 211,712 loose hits (1.9%).
+
+| File | Purpose |
+|---|---|
+| scripts/step13e_db_readability.sh | Candidate databases inventoried and checked for readability |
+| scripts/step13d_extract_u.py | Unannotated representatives extracted to fasta |
+| scripts/step13f_nrclust_search.sh | Search against ClusteredNR submitted |
+| scripts/step13h_gu_eu_split.sh | Split reported under several stated criteria |
+| scripts/step13i_fourway.py | Four-way classification assembled with per-class properties |
+
+Output: results/step13_nrclust20260128_hits.tsv, results/fourway_classes.tsv
+
+### Step 14. Structure of the unknown fraction
+
+Two controls are applied to the unannotated set before it is described as
+biology. AntiFam screens for spurious open reading frames using the same
+profiles and version used by the global survey this work is compared against.
+Clustering then asks whether unknown proteins resemble each other, which is the
+step that would produce protein families if they existed here.
+
+**Spurious sequences are rare.** AntiFam v6.0 flags 1,477 of 586,215
+representatives, 0.2520%. The published global survey flagged 43 of 19,986,348,
+but screened a set already filtered to families of 100 or more members, so the
+two rates are not directly comparable and both criteria are stated.
+
+**Unknown proteins do not form families.** Clustered at 50% identity with 80%
+coverage, the 586,215 unknown representatives give 536,813 families. Only 8,482
+have three or more members and 10 have 100 or more. The same measure applied to
+the 1,344,403 known representatives gives 398,126 families, 102,134 with three
+or more members and 379 with 100 or more. Known genes therefore cluster about
+sixteen times more often on identical data with an identical method, so the
+result is a property of the unknown fraction rather than of sample size.
+
+**Consequence for framing.** A family catalogue comparable to the 106,198
+novel metagenome protein families reported from 26,931 metagenomes cannot be
+built from 89. What this catalogue documents is non-redundant unknown protein
+space in one host, not a set of novel families.
+
+| File | Purpose |
+|---|---|
+| scripts/step14b_antifam.sh | AntiFam screen of the unannotated representatives |
+| scripts/step14c_novel_families.sh | Unknown representatives clustered at 50% identity |
+| scripts/step14d_unk_40.sh | Clustering repeated at 40% identity as a threshold control |
+
+Output: results/antifam_hits.tblout, results/unk_clusters_50.tsv,
+results/unk_family_sizes.tsv
+
+### Step 16. Abundance across all 89 metagenomes
+
+Reads are mapped to the support-filtered catalogue rather than the full one,
+since singleton representatives are contig-edge fragments and would compete for
+reads belonging to the intact gene. Two counting criteria are written for every
+gene in the same pass, so the choice between them is made at analysis time and
+never requires a remap. No alignment file is written to disk.
+
+**Reference.** The 2,069,453 supported representatives as nucleotide coding
+sequences, 1,750,474,248 bp, mean 845.9 bp, indexed with bwa-mem2 2.3. Reads
+are resolved through the sequencing manifest, with all 89 samples matched to
+distinct read pairs.
+
+**Mapping is even across cohorts.** Mean mapped fraction 0.9587 in WF22
+(n = 44), 0.9634 in WF23 (n = 9) and 0.9671 in WF24 (n = 36), a spread under
+one percentage point. The catalogue therefore represents all three collection
+years equally well, and the unmapped remainder is a measure of how much of each
+metagenome falls outside the analytical catalogue.
+
+**Verification.** Column sums of both count matrices reproduce the per-sample
+mapped-read totals exactly for all 89 samples. Genes detected at least once:
+2,069,187 under primary counting and 2,042,647 under the MAPQ >= 10 subset.
+
+| File | Purpose |
+|---|---|
+| scripts/step16b_supported_set.py | Support-filtered representative set materialized and cross-checked |
+| scripts/step16e_wf22_cds_rename.sh | WF22 coding sequences renamed and verified against the catalogue identifiers |
+| scripts/step16h_supported_cds.py | Mapping reference extracted for the supported representatives |
+| scripts/step16j_index_reference.sh | Reference length table built and indexed |
+| scripts/step16k_manifest_join.sh | Read files resolved for all 89 samples through the manifest |
+| scripts/step16q_map_array.sh | Mapping array, both counting criteria, no alignment file retained |
+| scripts/step16t_qc_table.sh | Per-sample mapping quality table with cohort labels |
+| scripts/step16u_matrix.py | Count matrices assembled and checked against the summaries |
+
+Output: results/count_matrix_primary.tsv.gz, results/count_matrix_mapq10.tsv.gz,
+results/mapping_qc_89.tsv, results/supported_reps_95.txt
+
+### Step 17. Treatment, maternal origin and time
+
+The WF22 design is longitudinal: 44 samples come from 15 animals sampled across
+three months. Any model treating those samples as independent inflates its
+p-values, so animal is used as a blocking factor. Each cohort is tested
+separately, since cohort is confounded with sequencing run. Genes are filtered
+to those present in most samples of the cohort before testing.
+
+**Method.** limma-voom with TMM normalization. Repeated sampling in WF22 is
+handled with duplicateCorrelation blocking on animal. LinDA was attempted first
+and abandoned: it allocates a matrix quadratic in the number of features and
+requested 1,010 Gb for 368,236 genes.
+
+**Ignoring the repeated sampling changes the answer.** The consensus
+within-animal correlation is 0.2864. Without blocking, the WF22 treatment
+contrasts return 4,993 and 7,275 genes. With blocking, on identical data, they
+return 3 and 155.
+
+**No treatment effect in any cohort.** Within egg mass 3, where the design is
+balanced, STP1710.7 against control returns zero genes from 21 samples and
+seven animals. WF23 returns zero for UHM520.7734 against control. WF24 returns
+zero for five of six strains and one gene for the sixth. Codes 5 and 6 in WF24
+are the two strains used in WF22, so the null is replicated in a second year
+with different animals. Across nine contrasts, three cohorts and seven
+Basidiobolus strains, gene abundance does not respond detectably.
+
+**Maternal origin and time do.** In the same blocked WF22 model, egg mass
+returns 57,183 and 51,864 genes and month returns up to 141,713. The negative
+treatment result is therefore not a failure of power in the design.
+
+**An aggregate test agrees.** The unannotated share of gene abundance does not
+differ by treatment in any cohort (Kruskal-Wallis p = 0.46 and 0.42 in WF22,
+Mann-Whitney p = 0.11 and 0.19 in WF23, Kruskal-Wallis p = 0.81 and 0.85 in
+WF24).
+
+| File | Purpose |
+|---|---|
+| scripts/step17a_sample_table.sh | Treatment and egg mass assembled for all 89 samples |
+| scripts/step17b_class_shift.py | Unannotated abundance share tested by treatment within cohort |
+| scripts/step17c_wf22_meta.sh | WF22 design table with animal, month and egg mass |
+| scripts/step17g_limma_wf22.R | WF22 tested blocked and unblocked, and within egg mass 3 |
+| scripts/step17h_limma_wf2324.R | WF23 and WF24 treatment contrasts |
+
+Output: results/limma_A_blocked_*.csv, results/limma_B_naive_*.csv,
+results/limma_C_EM3_*.csv, results/limma_WF23_*.csv, results/limma_WF24_*.csv,
+metadata/wf22_design.tsv, metadata/wf24_treatment_key.tsv
+
+### Step 19. Properties of the unknown fraction
+
+Whether the unannotated genes are biology or artefact is settled with measured
+properties rather than argument. Length, open reading frame completeness,
+prevalence, persistence across collection years and abundance share are compared
+across the four classes on the same catalogue.
+
+**They are short, and not because they are broken.** Mean coding length is
+1,045 bp for K, 795 for KWP, 497 for GU and 367 for EU. Restricting to complete
+open reading frames barely moves the unannotated figure, from 402 to 405 bp,
+while the known figure rises from 1,045 to 1,093. Complete reading frames make
+up 79.5% of K, 69.7% of KWP, 75.9% of GU and 63.7% of EU. Unannotated genes are
+therefore small complete proteins of about 134 amino acids, a size class that
+reference databases represent poorly.
+
+**They are widespread.** 82.9% of unannotated genes occur in more than 20 of
+89 samples and 3,471 occur in all 89. Only 0.7% occur in five or fewer.
+
+**They persist across years.** 497,044 unannotated genes occur in all three
+collection years and carry 91.18% of unannotated gene reads. The 18,914
+single-year genes are shorter, mean 246 bp, and carry 1.22%. A further 261
+genes attract no reads at all and are assembly artefacts. Requiring presence in
+all three years therefore removes almost no signal, which makes that subset a
+defensible core set for claims about persistence.
+
+**Abundance depends on how it is measured.** Unannotated genes are 28.33% of
+supported genes but 7.03% of raw mapped reads. After length normalization they
+are 19.28% of gene copies. The gap is entirely explained by their short length,
+so the length-normalized figure is the one that describes the community and the
+raw figure is reported alongside it. The share is stable across cohorts, 7.11%
+in WF22, 6.29% in WF23 and 7.11% in WF24, with a per-sample range of 4.39 to
+16.13%.
+
+| File | Purpose |
+|---|---|
+| scripts/step16v_prevalence.py | Prevalence per gene by cohort and class |
+| scripts/step16w_dark_abundance.py | Abundance share of each class, raw and length-normalized |
+| scripts/step16y_complete_by_class.py | Reading frame completeness by class from the gene caller flags |
+| scripts/step18a_dump_completeness.py | Completeness flags written per representative |
+| scripts/step19a_core_unknown.py | Unannotated genes characterized by number of years detected |
+| scripts/step18b_fig12.py | Prevalence and abundance figures |
+
+Output: results/prevalence_primary.tsv.gz, results/dark_abundance_by_sample.tsv,
+results/completeness_by_class.tsv, results/core_unknown_by_years.tsv.gz,
+figures fig_prevalence_by_class.png and fig_dark_abundance.png
+
+### Step 20. Taxonomic context of the unknown fraction
+
+Short unannotated proteins carry little taxonomic signal on their own, so
+taxonomy is inherited from the contig each gene sits on, using assignments made
+upstream against UniRef50. The question is not what species these genes come
+from, which the data cannot answer, but whether unannotated genes sit in more
+taxonomically obscure genomic neighbourhoods than annotated ones.
+
+**Coverage.** Contig assignments exist for 48 of 89 samples, giving taxonomy
+for 888,392 of 2,069,453 genes, about 43%. Every figure below is conditional on
+that subset and the comparison between classes carries the result, not the
+absolute values.
+
+**Unannotated genes sit on more obscure contigs.** Contigs are unclassified for
+74.6% of K genes, 74.6% of KWP, 74.4% of GU and 91.5% of EU. Among the genes
+whose contigs are classified, the environmental unknowns also invert the usual
+pattern: 4.5% eukaryotic against 3.9% bacterial, where the other three classes
+run about 23% bacterial and 2% eukaryotic. Genes with no database match are
+therefore embedded in DNA that is itself taxonomically orphan, which is what
+lineages without sequenced relatives would produce.
+
+| File | Purpose |
+|---|---|
+| scripts/step20a_tax_recon.sh | Existing scaffold classifications located and checked |
+| scripts/step20b_contig_tax.sh | Assignment file format and coverage verified |
+| scripts/step20c_gene_tax.py | Contig taxonomy inherited by gene and summarized by class |
+
+Output: results/gene_taxonomy.tsv
+
+### Step 21. Gene neighbourhood of unknown families
+
+Genes numbered consecutively on a contig are physical neighbours, and bacterial
+genes in the same pathway tend to sit together. Where an unknown family
+repeatedly appears beside the same annotated domain, that neighbour is a
+functional hint. This is applied only to the 8,482 unknown families with three
+or more members, since a family seen on one contig cannot show a conserved
+neighbourhood.
+
+| File | Purpose |
+|---|---|
+| scripts/step21a_neighbour_check.sh | Gene identifiers confirmed to encode contig and position |
+| scripts/step21b_neighbours.py | Annotated domains counted beside members of each unknown family |
+
+Output: results/unk_family_neighbours.tsv
 
 ## Planned steps
 
