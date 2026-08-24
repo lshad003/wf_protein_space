@@ -17,3 +17,8 @@ results/completeness_reps.tsv
 results/supported_cds_lengths.tsv
 results/step13_nrclust20260128_hits.tsv
 results/antifam_hits.tblout
+CHATINDEX.md
+# per-gene tables, too large for the repo
+results/fourway_classes.tsv
+results/gene_taxonomy.tsv
+results/unk_clusters_50.tsv

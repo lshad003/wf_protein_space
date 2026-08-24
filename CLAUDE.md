@@ -27,3 +27,8 @@
 - no find, no wget, no set -euo pipefail, no em-dashes
 - .md files are append-only except on an explicit request for a rewrite
 - data files are never committed; .gitignore is a whitelist
+- LinDA (MicrobiomeStat) allocates an n_features^2 matrix and fails at this
+  scale: 368,236 genes asked for 1010.3 Gb. Use limma-voom instead, with
+  duplicateCorrelation for repeated sampling.
+- WF22 is longitudinal: 44 samples from 15 animals across 3 months. Any
+  WF22 model must block on animal or the p-values are inflated.
