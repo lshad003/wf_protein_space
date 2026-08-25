@@ -43,13 +43,15 @@ ncontig=collections.Counter()
 for m,f in fam.items():
     if f not in keep: continue
     ncontig[f]+=1
+    seen=set()
     for off in (-1,1):
         x=nb(m,off)
         if x is None: continue
         r=rep.get(x)
         if r is None: continue
         d=dom.get(r)
-        if d: counts[f][d]+=1
+        if d: seen.add(d)
+    for d in seen: counts[f][d]+=1
 
 out=open(W+"/results/unk_family_neighbours.tsv","w")
 out.write("family\tn_members\ttop_domain\tn_with_domain\tpct_of_members\tsecond_domain\tn_second\n")

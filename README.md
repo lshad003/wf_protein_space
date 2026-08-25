@@ -474,7 +474,24 @@ genes in the same pathway tend to sit together. Where an unknown family
 repeatedly appears beside the same annotated domain, that neighbour is a
 functional hint. This is applied only to the 8,482 unknown families with three
 or more members, since a family seen on one contig cannot show a conserved
-neighbourhood.
+neighbourhood. A member counts once for a domain regardless of whether it
+appears on one side or both.
+
+**Nearly half have a conserved neighbour.** Of the 8,482 testable families,
+3,628 (42.8%) have an annotated domain beside at least half their members. The
+strongest cases, families of eight to ten members with a neighbour present in
+every one, sit beside oxidoreduction and respiration domains (GSDH, Rieske,
+COX1, adh_short, Aldo_ket_red), transporters (MFS_1, ATP_bind_1, mechanosensitive
+channels), regulators (HTH_1, TetR-like, PhoU), outer membrane and surface
+proteins (Fimbrial, AsmA), and peptidases. The unannotated genes are therefore
+embedded in ordinary bacterial metabolic and regulatory machinery rather than in
+mobile elements.
+
+**Two limits.** This applies only to families with three or more members, which
+is 1.4% of unannotated genes, so it describes the testable minority. And
+adjacency is read from gene numbering on a contig, so it inherits any assembly
+error in that contig. A conserved neighbour is a hypothesis about function, not
+an assignment.
 
 | File | Purpose |
 |---|---|
