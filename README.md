@@ -500,6 +500,64 @@ an assignment.
 
 Output: results/unk_family_neighbours.tsv
 
+### Step 22. Community-level and targeted tests of treatment
+
+Per-gene tests answer whether individual genes respond. They do not answer
+whether the community as a whole shifts, and a signal confined to a small
+functional class could be diluted across hundreds of thousands of genes. Three
+further designs address both, and the permutation scheme is treated as part of
+the design rather than a default.
+
+**Permutation has to match the design.** Treatment and egg mass are constant
+within an animal, so a scheme that permutes freely inside animal blocks never
+moves those labels and returns a meaningless result. Between-animal terms are
+therefore tested by permuting whole animals, which vegan allows only on a
+balanced design, so the one animal with two samples is dropped, leaving 42
+samples from 14 animals. Month varies within an animal and is permuted inside
+animals. An earlier run using block permutation for all three terms is
+superseded.
+
+**Composition does not shift with treatment.** On Bray-Curtis distances over
+Hellinger-transformed abundances, treatment explains 5.1% of variation with
+whole-animal permutation (p = 0.928) and 6.9% on animal centroids, which
+collapses the repeated measures to 15 independent units (p = 0.657). In WF24,
+where 36 animals are each sampled once, treatment explains 14.9% (p = 0.898).
+Constrained ordination on treatment, conditioning out egg mass and month,
+recovers no significant axis.
+
+**Nor does gene presence.** Scoring a gene as present at five or more reads
+gives 1,639,294 genes that vary across samples, a mean of 523,670 per sample.
+On Jaccard distances, treatment explains 6.2% (p = 0.665) and 10.6% on animal
+centroids (p = 0.465), and in WF24 14.8% (p = 0.951). The number of genes
+detected per sample does not differ by treatment (p = 0.356).
+
+**Nor the carbohydrate subset, where an effect was most plausible.** No CAZy
+annotation exists for this catalogue, so the subset is defined by Pfam family
+name, a looser proxy: 59,297 representatives, of which 7,902 are present in at
+least 35 of 44 samples. Blocked per-gene testing returns zero genes for both
+treatments, against 1,541 and 2,046 for egg mass and 1,763 and 2,587 for month
+in the same subset. Composition of the subset gives treatment 5.3%
+(p = 0.454) against egg mass 67.3% (p = 0.001), and total carbohydrate
+abundance does not differ (p = 0.305).
+
+**Maternal origin does shift composition.** Egg mass explains 32.7% of
+variation under whole-animal permutation and 51.3% on animal centroids, both
+p = 0.001, and its group dispersions do not differ (p = 0.214), so this is a
+difference in composition rather than in variability. Month explains 12.7%
+(p = 0.001).
+
+**One caveat on the negative.** Treatment groups do differ in dispersion
+(p = 0.003) while their centroids do not, so the groups vary in how much they
+vary. This is reported rather than interpreted.
+
+| File | Purpose |
+|---|---|
+| scripts/step22b_permanova_fix.R | Composition tested under three permutation designs |
+| scripts/step22c_jaccard.R | Presence/absence composition and gene richness |
+| scripts/step22d_cazy_subset.R | Carbohydrate subset tested per gene and by composition |
+
+Output: logs step22b, step22c and step22d; results/limma_cazy_*.csv
+
 ## Planned steps
 
 | Step | Description |
