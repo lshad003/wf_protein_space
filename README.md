@@ -270,43 +270,20 @@ Output: `results/step13_nrclust20260128_hits.tsv`, `results/fourway_classes_n88.
 
 ### Step 14. Structure of the unknown fraction
 
-Two controls are applied to the unannotated set before it is described as
-biology. AntiFam screens for spurious open reading frames using the same
-profiles and version used by the global survey this work is compared against.
-Clustering then asks whether unknown proteins resemble each other, which is the
-step that would produce protein families if they existed here.
+Unannotated representatives were screened for spurious open reading frames with
+AntiFam v6.0 and clustered at 50% identity and 80% coverage.
 
-**Spurious sequences are rare.** AntiFam v6.0 flags 1,464 of 585,347
-representatives, 0.2501%. The published global survey flagged 43 of 19,986,348,
-but screened a set already filtered to families of 100 or more members, so the
-two rates are not directly comparable and both criteria are stated.
-
-**Unknown proteins do not form families.** Clustered at 50% identity with 80%
-coverage, the 585,347 unknown representatives give 536,030 families. Only 8,464
-have three or more members and 10 have 100 or more. At 88 metagenomes these are
-the families of the 89-sample clustering restricted to supported members, not a
-new clustering. The same measure applied to
-the 1,344,403 known representatives gives 398,126 families, 102,134 with three
-or more members and 379 with 100 or more. Known genes therefore cluster about
-sixteen times more often on identical data with an identical method, so the
-result is a property of the unknown fraction rather than of sample size.
-
-**Consequence for framing.** A family catalogue comparable to the 106,198
-novel metagenome protein families reported from 26,931 metagenomes cannot be
-built from 88. What this catalogue documents is non-redundant unknown protein
-space in one host, not a set of novel families.
+**Result.** AntiFam flags 1,464 of 585,347 representatives (0.2501%). The
+585,347 representatives form 536,030 families; 8,464 have three or more members
+and 10 have 100 or more.
 
 | File | Purpose |
 |---|---|
-| scripts/step14b_antifam.sh | AntiFam screen of the unannotated representatives; 89 metagenomes, superseded by scripts/step14b_antifam_n88.sh |
-| scripts/step14b_antifam_n88.sh | AntiFam screen rerun on the 585,347 supported unknowns at 88 metagenomes |
-| scripts/step14c_novel_families.sh | Unknown representatives clustered at 50% identity; 89 metagenomes, superseded by scripts/step14c_novel_families_n88.sh |
-| scripts/step14c_novel_families_n88.sh | Family sizes at 88 metagenomes from the 50% clustering, no reclustering |
-| scripts/step14d_unk_40.sh | Clustering repeated at 40% identity as a threshold control |
+| `scripts/step14b_antifam_n88.sh` | AntiFam screen |
+| `scripts/step14c_novel_families_n88.sh` | Family sizes at 50% identity |
 
-Output: results/antifam_hits.tblout, results/unk_clusters_50.tsv,
-results/unk_family_sizes.tsv; at 88: results/antifam_hits_n88.tblout,
-results/unk_clusters_50_n88.tsv, results/unk_family_sizes_n88.tsv
+Output: `results/antifam_hits_n88.tblout`, `results/unk_clusters_50_n88.tsv`,
+`results/unk_family_sizes_n88.tsv`
 
 ### Step 16. Abundance across all 88 metagenomes
 
