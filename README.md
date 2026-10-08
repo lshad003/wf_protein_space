@@ -18,23 +18,24 @@ weekly and pooled by month; each metagenome is one monthly pool from one animal
 | WF24 | 35 | 35 | one pool per animal |
 
 **WF22.** Three egg masses; two *Basidiobolus* strains and control; three monthly
-timepoints. Six of 50 metagenomes were excluded: one control with *Basidiobolus*
-reads, one on quality review, and four animals that died during the experiment.
+timepoints. Six of 50 metagenomes were excluded before cataloging: one control
+with *Basidiobolus* reads, one that failed quality review, and four from animals
+that died during the experiment.
 
 **WF23.** Egg mass 3; 5 control and 4 UHM520.7734.
 
-**WF24.** 32 animals from egg mass 4 and 3 from egg mass 2, across seven treatment
-codes. Treated animals received at least two inoculations within the month. Tank
-is confounded with egg mass.
+**WF24.** 36 animals sequenced across seven treatment codes; treated animals
+received at least two inoculations within the month. One control with elevated
+*Basidiobolus* reads was excluded, leaving 35 (32 from egg mass 4, 3 from egg
+mass 2). One further animal was dropped from the experiment and is excluded from
+treatment tests only, which therefore use 34 animals (4 controls, 5 per strain).
+Tank is confounded with egg mass.
 
-**Exclusions.** UHM586.41010, a WF24 control with elevated *Basidiobolus* reads,
-is excluded from the catalog, applying the same criterion as WF22 sample
-UHM56.10839. Clustering was run on 89 metagenomes; UHM586.41010 members were then
-removed, the support rule (at least three members from at least two metagenomes)
-was reapplied, and original representatives were retained. UHM590.41012 remains in
-the catalog but, with UHM586.41010, is excluded from treatment tests, which use 34
-WF24 animals (4 controls, 5 per strain). Old and new values of every affected
-number are in `results/n88_number_table.tsv`.
+The catalog includes only metagenomes in the final experimental design.
+Because the WF24 exclusion was made after clustering, its proteins were removed
+from the cluster tables and the support rule was reapplied; original
+representatives were kept. Excluded samples are listed in
+`metadata/wf24_excluded.tsv`, and affected numbers in `results/n88_number_table.tsv`.
 
 | File | Purpose |
 |---|---|
