@@ -329,55 +329,33 @@ Output: `results/limma_*_n88.csv`, `metadata/wf22_design.tsv`
 
 ### Step 19. Properties of the unknown fraction
 
-Whether the unannotated genes are biology or artefact is settled with measured
-properties rather than argument. Length, open reading frame completeness,
-prevalence, persistence across collection years and abundance share are compared
-across the four classes on the same catalogue.
+Length, completeness, prevalence, persistence across years and abundance were
+compared across four classes: K (Pfam domain), KWP (eggNOG only), GU (genomic
+unknown) and EU (environmental unknown).
 
-**They are short, and not because they are broken.** Mean coding length is
-1,045 bp for K, 795 for KWP, 498 for GU and 367 for EU. Restricting to complete
-open reading frames barely moves the unannotated figure, from 402 to 405 bp,
-while the known figure rises from 1,045 to 1,093. Complete reading frames make
-up 79.5% of K, 69.8% of KWP, 76.0% of GU and 63.7% of EU. Unannotated genes are
-therefore small complete proteins of about 134 amino acids, a size class that
-reference databases represent poorly.
-
-**They are widespread.** 82.77% of unannotated genes occur in more than 20 of
-88 samples and 3,496 occur in all 88. Only 0.65% occur in five or fewer.
-
-**They persist across years.** 496,266 unannotated genes occur in all three
-collection years and carry 91.15% of unannotated gene reads. The 18,896
-single-year genes are shorter, mean 246 bp, and carry 1.23%. A further 260
-genes attract no reads at all and are assembly artefacts. Requiring presence in
-all three years therefore removes almost no signal, which makes that subset a
-defensible core set for claims about persistence.
-
-**Abundance depends on how it is measured.** Unannotated genes are 28.32% of
-supported genes but 7.04% of raw mapped reads. After length normalization they
-are 19.32% of gene copies. The gap is entirely explained by their short length,
-so the length-normalized figure is the one that describes the community and the
-raw figure is reported alongside it. The share is stable across cohorts, 7.11%
-in WF22, 6.28% in WF23 and 7.16% in WF24, with a per-sample range of 4.38 to
-16.12%.
+**Result.**
+- Length: mean coding length is 1,045 bp for K, 795 for KWP, 498 for GU and 367
+  for EU. Complete reading frames are 79.5%, 69.8%, 76.0% and 63.7%, so unknown
+  genes are short but mostly complete.
+- Prevalence: 82.77% of unannotated genes occur in more than 20 of 88 samples,
+  3,496 in all 88, and 0.65% in five or fewer.
+- Persistence: 496,266 unannotated genes occur in all three years and carry
+  91.15% of unannotated reads; 18,896 single-year genes carry 1.23%, and 260
+  genes receive no reads.
+- Abundance: unannotated genes are 28.32% of supported genes, 7.04% of raw mapped
+  reads and 19.32% after length normalization; the raw share is 7.11% in WF22,
+  6.28% in WF23 and 7.16% in WF24 (per sample 4.38 to 16.12%).
 
 | File | Purpose |
 |---|---|
-| scripts/step16v_prevalence.py | Prevalence per gene by cohort and class; 89 metagenomes, superseded by scripts/step16v_prevalence_n88.py |
-| scripts/step16v_prevalence_n88.py | Prevalence per gene by cohort and class, 88 metagenomes |
-| scripts/step16w_dark_abundance.py | Abundance share of each class, raw and length-normalized; 89 metagenomes, superseded by scripts/step16w_dark_abundance_n88.py |
-| scripts/step16w_dark_abundance_n88.py | Abundance share of each class, 88 metagenomes |
-| scripts/step16y_complete_by_class.py | Reading frame completeness by class from the gene caller flags; 89 metagenomes, superseded by scripts/step16y_complete_by_class_n88.py |
-| scripts/step16y_complete_by_class_n88.py | Completeness and mean length by class, 88 metagenomes |
-| scripts/step18a_dump_completeness.py | Completeness flags written per representative |
-| scripts/step19a_core_unknown.py | Unannotated genes characterized by number of years detected; 89 metagenomes, superseded by scripts/step19a_core_unknown_n88.py |
-| scripts/step19a_core_unknown_n88.py | Unannotated genes by number of years detected, 88 metagenomes |
-| scripts/step18b_fig12.py | Prevalence and abundance figures |
+| `scripts/step16y_complete_by_class_n88.py` | Length and completeness by class |
+| `scripts/step16v_prevalence_n88.py` | Prevalence by class |
+| `scripts/step19a_core_unknown_n88.py` | Persistence across years |
+| `scripts/step16w_dark_abundance_n88.py` | Abundance share, raw and length-normalized |
+| `scripts/step18b_fig12.py` | Prevalence and abundance figures |
 
-Output: results/prevalence_primary.tsv.gz, results/dark_abundance_by_sample.tsv,
-results/completeness_by_class.tsv, results/core_unknown_by_years.tsv.gz,
-figures fig_prevalence_by_class.png and fig_dark_abundance.png; at 88:
-results/prevalence_primary_n88.tsv.gz, results/dark_abundance_by_sample_n88.tsv,
-results/core_unknown_by_years_n88.tsv.gz, results/completeness_by_class_n88.tsv
+Output: `results/completeness_by_class_n88.tsv`, `results/prevalence_primary_n88.tsv.gz`,
+`results/core_unknown_by_years_n88.tsv.gz`, `results/dark_abundance_by_sample_n88.tsv`
 
 ### Step 20. Taxonomic context of the unknown fraction
 
