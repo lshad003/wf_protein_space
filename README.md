@@ -75,23 +75,20 @@ families at 50%.
 
 Output: `catalog/db/LsPS_AA_{95,90,50}_cluster`, `results/clusters_{95,90,50}_n88.tsv`
 
-### Step 3. Search-based coverage of the earlier catalog
+### Step 3. Overlap with the earlier WF22 catalog
 
-A random subsample of new-cohort proteins is searched against the earlier
-WF22-only catalog to measure how much of the new protein space it already
-represented. A positive control of WF22 proteins, which built that catalog and
-must therefore be recovered, validates the search settings before the result is
-interpreted.
+A random subsample of WF23 and WF24 proteins was searched with MMseqs2 against the
+earlier WF22-only catalog, using query-side coverage. A positive control of WF22
+proteins was recovered at 98.25%.
 
-**Main result.** Coverage mode determines the answer. Under target-side coverage the positive control recovered only 61.43% of proteins that are present in the catalog by construction, because short proteins cannot cover 80% of a longer representative; mapped proteins had median length 260 aa against 123 aa for unmapped. Under query-side coverage the control recovers 98.25%, and on that setting 45.89% of new-cohort proteins match the earlier catalog at gene level and 66.49% at family level. At 88 metagenomes the 2,396 UHM586.41010 proteins are dropped from the new-cohort subsample and the existing hits are restricted to the remaining 196,446; no search is repeated, and the WF22 control is unaffected.
+**Result.** 45.89% of WF23 and WF24 proteins match the earlier catalog at gene
+level and 66.49% at family level.
 
 | File | Purpose |
 |---|---|
-| `scripts/step2c_diagnostic_epyc.sh` | Subsample search, gene-level tier |
-| `scripts/step2d_control_and_tiers.sh` | Positive control and family-level tier; 89 metagenomes, superseded by `scripts/step2d_control_and_tiers_n88.sh` |
-| `scripts/step2d_control_and_tiers_n88.sh` | Control and family-level tier, UHM586.41010 queries dropped from the existing hits |
-| `scripts/step2e_covmode2.sh` | Coverage-mode comparison with control; 89 metagenomes, superseded by `scripts/step2e_covmode2_n88.sh` |
-| `scripts/step2e_covmode2_n88.sh` | Coverage-mode comparison, UHM586.41010 queries dropped from the existing hits |
+| `scripts/step2c_diagnostic_epyc.sh` | Subsample search, gene level |
+| `scripts/step2d_control_and_tiers_n88.sh` | Positive control and family level |
+| `scripts/step2e_covmode2_n88.sh` | Query-side coverage search |
 
 ### Step 4. Catalog composition and cluster support
 
