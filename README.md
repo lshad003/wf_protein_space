@@ -440,25 +440,6 @@ HMMER 3.4 (Pfam), BBTools read statistics, Python 3.9 with NumPy 1.26.4.
 
 ## Conventions
 
-No count is stated without the output file that produced it. Coverage mode is stated explicitly for every search, since
-it changes recovery by more than thirty percentage points. Cluster-level claims
+No count is stated without the output file that produced it. Coverage mode is stated explicitly for every search. Cluster-level claims
 are made on support-filtered clusters, and cohort comparisons at matched
 sampling effort.
-
-## Interpretation rules
-
-1. Catalog richness is interpreted only after matching protein depth or
-   accounting for sequencing run.
-2. Cohort-exclusive clusters are interpreted only after support filtering, since
-   singletons are necessarily cohort-exclusive and are dominated by contig-edge
-   fragments.
-3. Egg mass is tested only within cohorts where the sequenced samples provide
-   replication across egg masses.
-4. Treatment is tested within cohort first. Cross-cohort comparison is made on
-   overlap and functional category, not a pooled model, since cohort is
-   confounded with sequencing run.
-5. A candidate novel protein family requires no database hit, support across
-   multiple proteins and metagenomes, a length filter, removal of spurious-ORF
-   matches, and exclusion of contig-edge fragments.
-6. Language: cohort-associated or cohort-restricted protein space, never
-   cohort-specific biology or year-driven expansion.
