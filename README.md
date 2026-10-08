@@ -31,7 +31,6 @@ mass 2). One further animal was dropped from the experiment and is excluded from
 treatment tests only, which therefore use 34 animals (4 controls, 5 per strain).
 Tank is confounded with egg mass.
 
-The catalog includes only metagenomes in the final experimental design.
 Because the WF24 exclusion was made after clustering, its proteins were removed
 from the cluster tables and the support rule was reapplied; original
 representatives were kept. Excluded samples are listed in
