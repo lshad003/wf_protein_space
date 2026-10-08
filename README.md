@@ -48,7 +48,7 @@ Output: `results/supported_reps_95_n88.txt`, `results/count_matrix_primary_n88.t
 
 ### Step 1. Gene prediction
 
-Proteins were predicted from assembled contigs with Prodigal in metagenomic mode.
+Proteins were predicted from assembled contigs with Prodigal v2.6.3 in metagenomic mode.
 
 **Result.** 40,550,595 proteins from 89 metagenomes; 40,257,962 after excluding
 one WF24 sample.
@@ -285,7 +285,7 @@ and 10 have 100 or more.
 Output: `results/antifam_hits_n88.tblout`, `results/unk_clusters_50_n88.tsv`,
 `results/unk_family_sizes_n88.tsv`
 
-### Step 16. Abundance
+### Step 15. Abundance
 
 Reads were mapped with bwa-mem2 2.3 to the 2,069,453 supported representatives
 (nucleotide coding sequences). The matrix used in all analyses is restricted to
@@ -303,7 +303,7 @@ WF24, so the catalog represents all three years equally.
 
 Output: `results/count_matrix_primary_n88.tsv.gz`, `results/mapping_qc_88.tsv`
 
-### Step 17. Treatment, egg mass and month: per-gene tests
+### Step 16. Treatment, egg mass and month: per-gene tests
 
 Gene abundance was tested per gene with limma-voom (TMM normalization), each cohort
 separately. WF22 samples are repeated measures of 15 animals, so animal was
@@ -327,7 +327,7 @@ The unannotated share of gene abundance does not differ by treatment in any coho
 
 Output: `results/limma_*_n88.csv`, `metadata/wf22_design.tsv`
 
-### Step 19. Properties of the unknown fraction
+### Step 17. Properties of the unknown fraction
 
 Length, completeness, prevalence, persistence across years and abundance were
 compared across four classes: K (Pfam domain), KWP (eggNOG only), GU (genomic
@@ -357,7 +357,7 @@ unknown) and EU (environmental unknown).
 Output: `results/completeness_by_class_n88.tsv`, `results/prevalence_primary_n88.tsv.gz`,
 `results/core_unknown_by_years_n88.tsv.gz`, `results/dark_abundance_by_sample_n88.tsv`
 
-### Step 20. Taxonomic context of the unknown fraction
+### Step 18. Taxonomic context of the unknown fraction
 
 Each gene inherited the taxonomy of its contig, from existing UniRef50-based
 contig assignments, to ask whether unannotated genes sit on less classifiable DNA.
@@ -375,7 +375,7 @@ unclassified, consistent with lineages lacking sequenced relatives.
 
 Output: `results/gene_taxonomy_n88.tsv`
 
-### Step 21. Gene neighbourhood of unknown families
+### Step 19. Gene neighbourhood of unknown families
 
 For the 8,464 unknown families with three or more members, annotated domains on
 adjacent genes were counted. A domain beside at least half of a family's members
@@ -394,7 +394,7 @@ Members of these families are 6.29% of supported unannotated genes.
 
 Output: `results/unk_family_neighbours_n88.tsv`
 
-### Step 22. Community-level tests
+### Step 20. Community-level tests
 
 Whole-community gene abundance (Bray-Curtis on Hellinger-transformed counts) and
 gene presence (Jaccard, at least five reads) were tested with PERMANOVA. In WF22,
@@ -425,17 +425,6 @@ tested) was analysed the same way and per gene.
 
 Output: logs `step22b_n88` to `step22e_n88`, `results/limma_cazy_*_n88.csv`
 
-## Planned steps
-
-| Step | Description |
-|---|---|
-| 12 | Pfam domain assignment and the union of eggNOG and Pfam coverage |
-| 13 | Four-way split: known with domain, known without domain, genomic unknown, environmental unknown |
-| 14 | Novel family calling on supported clusters with no database match |
-| 15 | Structure prediction and structure search for novel family representatives |
-| 16 | Abundance across all 88 metagenomes; prevalence, core and accessory |
-| 17 | Treatment contrasts within cohort |
-
 ## Software
 
 Prodigal V2.6.3, MMseqs2 13-45111, eggNOG-mapper 2.1.9 (eggNOG 5.0.2),
@@ -451,9 +440,7 @@ HMMER 3.4 (Pfam), BBTools read statistics, Python 3.9 with NumPy 1.26.4.
 
 ## Conventions
 
-No count is stated without the output file that produced it. MMseqs2 is pinned
-to 13-45111 and runs only on the epyc partition, since other nodes fail with an
-illegal instruction. Coverage mode is stated explicitly for every search, since
+No count is stated without the output file that produced it. Coverage mode is stated explicitly for every search, since
 it changes recovery by more than thirty percentage points. Cluster-level claims
 are made on support-filtered clusters, and cohort comparisons at matched
 sampling effort.
