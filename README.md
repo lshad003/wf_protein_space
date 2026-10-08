@@ -90,20 +90,20 @@ level and 66.49% at family level.
 | `scripts/step2d_control_and_tiers_n88.sh` | Positive control and family level |
 | `scripts/step2e_covmode2_n88.sh` | Query-side coverage search |
 
-### Step 4. Catalog composition and cluster support
+### Step 4. Cluster support and cohort sharing
 
-Every cluster is resolved into the cohorts its members come from, at each tier,
-before and after filters on cluster support. Singleton clusters are necessarily
-cohort-exclusive, so cohort sharing cannot be interpreted until they are removed.
+Each cluster was assigned the cohorts its members come from. Clusters with at
+least three members from at least two metagenomes form the supported catalog.
 
-**Main result.** 55.29% of gene-level clusters are singletons. A support filter of at least three members from at least two metagenomes leaves 2,067,011 clusters, and cohort sharing rises sharply: clusters containing all three cohorts go from 6.72% to 20.06%, and at family level to 26.00%. Cluster size is heavily skewed, with the top 1% of family-level clusters holding 45.77% of all proteins.
+**Result.** 55.29% of 95% clusters are singletons. The supported catalog has
+2,067,011 clusters. Clusters shared by all three cohorts rise from 6.72% of all
+clusters to 20.06% of supported clusters, and to 26.00% at family level. The top
+1% of families hold 45.77% of all proteins.
 
 | File | Purpose |
 |---|---|
-| `scripts/step3_cluster_composition.sh` | Cluster membership tables and cohort composition; 89 metagenomes, superseded by `scripts/step3_cluster_composition_n88.sh` |
-| `scripts/step3_cluster_composition_n88.sh` | Cohort composition from the 88-metagenome cluster tables |
-| `scripts/step4_nonsingleton.sh` | Composition under four support filters, size distribution; 89 metagenomes, superseded by `scripts/step4_nonsingleton_n88.sh` |
-| `scripts/step4_nonsingleton_n88.sh` | Composition under four support filters, 88 metagenomes; reproduces 2,067,011 supported clusters |
+| `scripts/step3_cluster_composition_n88.sh` | Cohort composition of each cluster |
+| `scripts/step4_nonsingleton_n88.sh` | Support filter and cluster size distribution |
 
 ### Step 5. Cohort contribution at matched sampling effort
 
