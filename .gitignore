@@ -24,3 +24,12 @@ results/gene_taxonomy.tsv
 results/unk_clusters_50.tsv
 CLAUDE.md
 PROJECT_LOG.md
+# scripts of other tracks (Basidiobolus detection, Dallas paper, MAG deposit) stay on the cluster only
+scripts/basid_*
+scripts/dallas*
+scripts/mag*
+scripts/inspect_map_bas.sh
+scripts/locate_basid_mapping.py
+scripts/locate_basid_readtable.py
+scripts/fix_dup_bank_20261007.py
+scripts/__pycache__/
