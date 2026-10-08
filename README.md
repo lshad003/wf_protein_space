@@ -225,40 +225,26 @@ sparse. The unannotated fraction has no taxonomic assignment from this analysis.
 
 Output: `results/taxonomy_summary_n88.tsv`
 
-### Step 12. Annotation coverage and the four-way classification
+### Step 12. Combined annotation and protein classes
 
-Two annotation sources are combined before any dark fraction is quoted, since
-eggNOG alone overstates it. Pfam is assigned with hmmsearch under gathering
-thresholds, which fixes the criterion without a chosen E-value. The union then
-defines what counts as known, and everything unknown is carried forward.
+eggNOG and Pfam (hmmsearch, gathering thresholds) were combined: a protein is
+known if either source annotates it.
 
-**Coverage.** Of 6,171,602 representatives, eggNOG annotates 2,980,052
-(48.29%), Pfam 2,709,544 (43.90%), and their union 3,222,677 (52.22%). Within
-the support-filtered set of 2,067,011, the union leaves 585,347 unannotated
-(28.32%). At the 50% family tier the supported dark fraction falls from 55.40%
-under eggNOG alone to 51.47% under the union, so about four points of the
-earlier figure were an artefact of using one database.
-
-**Classes.** Representatives are labelled K if they carry a Pfam domain,
-KWP if eggNOG assigns them but Pfam does not, and U if neither does. Supported
-counts are K 1,343,020, KWP 138,644, U 585,347. Of the K representatives,
-76,515 carry only DUF or UPF domains, which a stricter definition would move
-out of K, leaving 1,266,505.
+**Result.** The union annotates 3,222,677 of 6,171,602 representatives (52.22%).
+Of the 2,067,011 supported representatives, 585,347 (28.32%) have no annotation.
+At the 50% family level, the supported unannotated fraction is 51.47%, against
+55.40% with eggNOG alone. Supported representatives fall into three classes:
+K, with a Pfam domain (1,343,020, of which 76,515 carry only DUF or UPF domains);
+KWP, eggNOG only (138,644); and U, unannotated (585,347).
 
 | File | Purpose |
 |---|---|
-| scripts/step12c_check_pfam_done.sh | Pfam completion verified before any Pfam number is used |
-| scripts/step12d_union_replevel.sh | Representative-level union of eggNOG and Pfam; 89 metagenomes, superseded by scripts/step12d_union_replevel_n88.sh |
-| scripts/step12d_union_replevel_n88.sh | Representative-level union, 88 metagenomes |
-| scripts/step12e_family_union.py | Union carried to the 50% family tier; 89 metagenomes, superseded by scripts/step12e_family_union_n88.py |
-| scripts/step12e_family_union_n88.py | Union carried to the 50% family tier, 88 metagenomes |
-| scripts/step12f_rep_classes.sh | Per-representative K, KWP and U labels with the DUF split; 89 metagenomes, superseded by scripts/step12f_rep_classes_n88.sh |
-| scripts/step12f_rep_classes_n88.sh | K, KWP and U labels, 88 metagenomes; classes checked equal to the 89 labels |
+| `scripts/step12d_union_replevel_n88.sh` | eggNOG and Pfam union per representative |
+| `scripts/step12e_family_union_n88.py` | Union at the 50% family level |
+| `scripts/step12f_rep_classes_n88.sh` | K, KWP and U labels |
 
-Output: results/union_rep_level.tsv, results/family_union_dark.tsv,
-results/rep_classes.tsv, results/known_union_ids.txt; at 88:
-results/union_rep_level_n88.tsv, results/family_union_dark_n88.tsv,
-results/rep_classes_n88.tsv, results/known_union_ids_n88.txt
+Output: `results/union_rep_level_n88.tsv`, `results/family_union_dark_n88.tsv`,
+`results/rep_classes_n88.tsv`
 
 ### Step 13. Genomic and environmental unknowns
 
