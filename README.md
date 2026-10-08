@@ -119,21 +119,23 @@ Richness at 9 metagenomes is 765,122 clusters for WF22, 1,166,662 for WF23 and
 |---|---|
 | `scripts/step5_equaln_rarefaction_n88.sh` | Equal-effort comparison and per-cohort accumulation |
 
-### Step 6. Batch structure
+### Step 6. Sequencing batch
 
-Sequencing run, centre, platform and read depth are tabulated for all 88
-metagenomes, so that cohort comparisons can be checked against the batch
-structure they are confounded with.
+Sequencing run, centre, platform and read depth were tabulated for all 88
+metagenomes to check cohort comparisons against batch.
 
-**Main result.** Sequencing runs are not fully confounded with cohort. WF23 and WF24 share one run, and WF24 spans two runs, which permits direct estimation of batch effects. Within the shared run WF23 and WF24 yield 422,857 and 431,504 proteins per metagenome, so cohort alone does not affect protein yield. Across its two runs WF24 yields 431,504 against 756,692 proteins per metagenome, a 1.75-fold difference on 1.24-fold more reads. The difference is assembly size rather than gene prediction, since gene density per Mb is constant across runs. WF22 occupies separate runs at two centres plus one AVITI run, so WF22 against new-cohort contrasts cannot be separated from batch.
+**Result.** WF23 and WF24 share one run and yield similar protein numbers per
+metagenome (422,857 and 431,504), so cohort alone does not change yield. WF24
+spans two runs that differ 1.75-fold (431,504 against 756,692) on 1.24-fold more
+reads, driven by assembly size; gene density per Mb is constant. WF22 was
+sequenced on separate runs, so WF22 against WF23 and WF24 cannot be separated
+from batch.
 
 | File | Purpose |
 |---|---|
-| `scripts/step6a_inspect_qc.sh` | Read statistics format and run assignment |
-| `scripts/step6b_batch_table.sh` | Batch table and the two key contrasts; 89 metagenomes, superseded by `scripts/step6b_batch_table_n88.sh` |
-| `scripts/step6b_batch_table_n88.sh` | Batch table and the two key contrasts, 88 metagenomes |
+| `scripts/step6b_batch_table_n88.sh` | Batch table and run contrasts |
 
-Output: `results/batch_table_89.tsv`; at 88: `results/batch_table_88.tsv`
+Output: `results/batch_table_88.tsv`
 
 ### Step 7. Depth-normalized rarefaction
 
