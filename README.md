@@ -377,38 +377,22 @@ Output: `results/gene_taxonomy_n88.tsv`
 
 ### Step 21. Gene neighbourhood of unknown families
 
-Genes numbered consecutively on a contig are physical neighbours, and bacterial
-genes in the same pathway tend to sit together. Where an unknown family
-repeatedly appears beside the same annotated domain, that neighbour is a
-functional hint. This is applied only to the 8,464 unknown families with three
-or more members, since a family seen on one contig cannot show a conserved
-neighbourhood. A member counts once for a domain regardless of whether it
-appears on one side or both.
+For the 8,464 unknown families with three or more members, annotated domains on
+adjacent genes were counted. A domain beside at least half of a family's members
+is taken as a conserved neighbour, a hypothesis about function rather than an
+assignment.
 
-**Nearly half have a conserved neighbour.** Of the 8,464 testable families,
-3,614 (42.7%) have an annotated domain beside at least half their members. The
-strongest cases, families of eight to ten members with a neighbour present in
-every one, sit beside oxidoreduction and respiration domains (GSDH, Rieske,
-COX1, adh_short, Aldo_ket_red), transporters (MFS_1, ATP_bind_1, mechanosensitive
-channels), regulators (HTH_1, TetR-like, PhoU), outer membrane and surface
-proteins (Fimbrial, AsmA), and peptidases. The unannotated genes are therefore
-embedded in ordinary bacterial metabolic and regulatory machinery rather than in
-mobile elements.
-
-**Two limits.** This applies only to families with three or more members, whose
-members are 6.29% of supported unannotated genes, so it describes the testable minority. And
-adjacency is read from gene numbering on a contig, so it inherits any assembly
-error in that contig. A conserved neighbour is a hypothesis about function, not
-an assignment.
+**Result.** 3,614 families (42.7%) have a conserved annotated neighbour. The
+strongest cases sit beside oxidoreduction and respiration domains (GSDH, Rieske,
+COX1, adh_short, Aldo_ket_red), transporters (MFS_1, ATP_bind_1), regulators
+(HTH_1, TetR-like, PhoU), surface proteins (Fimbrial, AsmA) and peptidases.
+Members of these families are 6.29% of supported unannotated genes.
 
 | File | Purpose |
 |---|---|
-| scripts/step21a_neighbour_check.sh | Gene identifiers confirmed to encode contig and position; 89 metagenomes, superseded by scripts/step21a_neighbour_check_n88.sh |
-| scripts/step21a_neighbour_check_n88.sh | Identifier check on the 88-metagenome tables |
-| scripts/step21b_neighbours.py | Annotated domains counted beside members of each unknown family; 89 metagenomes, superseded by scripts/step21b_neighbours_n88.py |
-| scripts/step21b_neighbours_n88.py | Neighbour domains of unknown families, 88 metagenomes |
+| `scripts/step21b_neighbours_n88.py` | Neighbour domains of unknown families |
 
-Output: results/unk_family_neighbours.tsv; at 88: results/unk_family_neighbours_n88.tsv
+Output: `results/unk_family_neighbours_n88.tsv`
 
 ### Step 22. Community-level and targeted tests of treatment
 
