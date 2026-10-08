@@ -303,60 +303,29 @@ WF24, so the catalog represents all three years equally.
 
 Output: `results/count_matrix_primary_n88.tsv.gz`, `results/mapping_qc_88.tsv`
 
-### Step 17. Treatment, maternal origin and time
+### Step 17. Treatment, egg mass and month: per-gene tests
 
-The WF22 design is longitudinal: 44 samples come from 15 animals sampled across
-three months. Any model treating those samples as independent inflates its
-p-values, so animal is used as a blocking factor. Each cohort is tested
-separately, since cohort is confounded with sequencing run. Genes are filtered
-to those present in most samples of the cohort before testing.
+Gene abundance was tested per gene with limma-voom (TMM normalization), each cohort
+separately. WF22 samples are repeated measures of 15 animals, so animal was
+blocked with duplicateCorrelation.
 
-**Method.** limma-voom with TMM normalization. Repeated sampling in WF22 is
-handled with duplicateCorrelation blocking on animal. LinDA was attempted first
-and abandoned: it allocates a matrix quadratic in the number of features and
-requested 1,010 Gb for 368,236 genes.
-
-**Ignoring the repeated sampling changes the answer.** The consensus
-within-animal correlation is 0.2864. Without blocking, the WF22 treatment
-contrasts return 5,005 and 7,263 genes. With blocking, on identical data, they
-return 3 and 155.
-
-**No treatment effect in any cohort.** Within egg mass 3, where the design is
-balanced, STP1710.7 against control returns zero genes from 21 samples and
-seven animals. WF23 returns zero for UHM520.7734 against control. WF24 returns
-zero for five of six strains and three genes for the sixth (code 3, UHM516.7697; 34 animals). Codes 5 and 6 in WF24
-are the two strains used in WF22, so the null is replicated in a second year
-with different animals. Across nine contrasts, three cohorts and seven
-Basidiobolus strains, gene abundance does not respond detectably.
-
-**Maternal origin and time do.** In the same blocked WF22 model, egg mass
-returns 57,120 and 51,808 genes and month returns up to 141,580. The negative
-treatment result is therefore not a failure of power in the design.
-
-**An aggregate test agrees.** The unannotated share of gene abundance does not
-differ by treatment in any cohort (Kruskal-Wallis p = 0.4688 and 0.4222 in WF22,
-Mann-Whitney p = 0.1111 and 0.1905 in WF23, Kruskal-Wallis p = 0.4481 and 0.5527
-in WF24 with 34 animals).
+**Result.** Within-animal correlation is 0.2864; without blocking, WF22 treatment
+contrasts return 5,005 and 7,263 genes, and with blocking 3 and 155. In the same
+blocked model egg mass returns 57,120 and 51,808 genes and month up to 141,580.
+Within the balanced egg mass 3 subset, treatment returns zero genes. WF23 returns
+zero; WF24 (34 animals) returns zero for five of six strains and 3 genes for one.
+The unannotated share of gene abundance does not differ by treatment in any cohort
+(all p > 0.1).
 
 | File | Purpose |
 |---|---|
-| scripts/step17a_sample_table.sh | Treatment and egg mass assembled for all 89 samples |
-| scripts/step17b_class_shift.py | Unannotated abundance share tested by treatment within cohort; 89 metagenomes, superseded by scripts/step17b_class_shift_n88.py |
-| scripts/step17b_class_shift_n88.py | Unannotated abundance share by treatment, 88 metagenomes, WF24 34 animals |
-| scripts/step17b_class_shift_89log.sh | Unchanged step17b run once more to record its 89-sample output in a log |
-| scripts/step17c_wf22_meta.sh | WF22 design table with animal, month and egg mass |
-| scripts/step17g_limma_wf22.R | WF22 tested blocked and unblocked, and within egg mass 3; 89 metagenomes, superseded by scripts/step17g_limma_wf22_n88.R |
-| scripts/step17g_limma_wf22_n88.R | WF22 tested blocked and unblocked, and within egg mass 3, 88-metagenome matrix |
-| scripts/step17h_limma_wf2324.R | WF23 treatment contrasts; its WF24 run (36 animals) is superseded by step17i; 89 metagenomes, superseded by scripts/step17h_limma_wf2324_n88.R |
-| scripts/step17h_limma_wf2324_n88.R | WF23 treatment contrasts, 88-metagenome matrix |
-| scripts/step17i_limma_wf24_n34.R | WF24 treatment contrasts, 34 animals, exclusions in metadata/wf24_excluded.tsv; 89 metagenomes, superseded by scripts/step17i_limma_wf24_n34_n88.R |
-| scripts/step17i_limma_wf24_n34_n88.R | WF24 treatment contrasts, 34 animals, 88-metagenome matrix |
+| `scripts/step17c_wf22_meta.sh` | WF22 design table |
+| `scripts/step17g_limma_wf22_n88.R` | WF22, blocked and unblocked |
+| `scripts/step17h_limma_wf2324_n88.R` | WF23 |
+| `scripts/step17i_limma_wf24_n34_n88.R` | WF24, 34 animals |
+| `scripts/step17b_class_shift_n88.py` | Unannotated abundance share by treatment |
 
-Output: results/limma_A_blocked_*.csv, results/limma_B_naive_*.csv,
-results/limma_C_EM3_*.csv, results/limma_WF23_*.csv, results/limma_WF24_n34_*.csv (results/limma_WF24_treatment*.csv
-are the superseded 36-animal run),
-metadata/wf22_design.tsv, metadata/wf24_treatment_key.tsv, metadata/wf24_excluded.tsv;
-at 88: results/limma_*_n88.csv, metadata/samples_88_treatment.tsv
+Output: `results/limma_*_n88.csv`, `metadata/wf22_design.tsv`
 
 ### Step 19. Properties of the unknown fraction
 
