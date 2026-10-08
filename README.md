@@ -285,51 +285,23 @@ and 10 have 100 or more.
 Output: `results/antifam_hits_n88.tblout`, `results/unk_clusters_50_n88.tsv`,
 `results/unk_family_sizes_n88.tsv`
 
-### Step 16. Abundance across all 88 metagenomes
+### Step 16. Abundance
 
-Reads are mapped to the support-filtered catalogue rather than the full one,
-since singleton representatives are contig-edge fragments and would compete for
-reads belonging to the intact gene. Two counting criteria are written for every
-gene in the same pass, so the choice between them is made at analysis time and
-never requires a remap. No alignment file is written to disk.
+Reads were mapped with bwa-mem2 2.3 to the 2,069,453 supported representatives
+(nucleotide coding sequences). The matrix used in all analyses is restricted to
+the 2,067,011 clusters supported at 88 metagenomes.
 
-**Reference.** The 2,069,453 supported representatives as nucleotide coding
-sequences, 1,750,474,248 bp, mean 845.9 bp, indexed with bwa-mem2 2.3. Reads
-are resolved through the sequencing manifest, with all 89 samples matched to
-distinct read pairs.
-
-**Mapping is even across cohorts.** Mean mapped fraction 0.9587 in WF22
-(n = 44), 0.9634 in WF23 (n = 9) and 0.9667 in WF24 (n = 35), a spread under
-one percentage point. The catalogue therefore represents all three collection
-years equally well, and the unmapped remainder is a measure of how much of each
-metagenome falls outside the analytical catalogue.
-
-**Verification.** Column sums of both count matrices reproduce the per-sample
-mapped-read totals exactly for all 89 samples. Genes detected at least once:
-2,066,746 under primary counting and 2,040,274 under the MAPQ >= 10 subset.
+**Result.** Mean mapped fraction is 0.9587 in WF22, 0.9634 in WF23 and 0.9667 in
+WF24, so the catalog represents all three years equally.
 
 | File | Purpose |
 |---|---|
-| scripts/step16b_supported_set.py | Support-filtered representative set materialized and cross-checked |
-| scripts/step16e_wf22_cds_rename.sh | WF22 coding sequences renamed and verified against the catalogue identifiers |
-| scripts/step16h_supported_cds.py | Mapping reference extracted for the supported representatives |
-| scripts/step16j_index_reference.sh | Reference length table built and indexed |
-| scripts/step16k_manifest_join.sh | Read files resolved for all 89 samples through the manifest |
-| scripts/step16q_map_array.sh | Mapping array, both counting criteria, no alignment file retained |
-| scripts/step16t_qc_table.sh | Per-sample mapping quality table with cohort labels; 89 metagenomes, superseded by scripts/step16t_qc_table_n88.sh |
-| scripts/step16t_qc_table_n88.sh | Mapping quality table without UHM586.41010, by cohort |
-| scripts/step16u_matrix.py | Count matrices assembled and checked against the summaries; 89 metagenomes, superseded by scripts/step16u_matrix_n88.py |
-| scripts/step16u_matrix_n88.py | Both matrices at 88 metagenomes from the 89 matrices; column sums checked |
+| `scripts/step16h_supported_cds.py` | Mapping reference |
+| `scripts/step16j_index_reference.sh` | Reference index |
+| `scripts/step16q_map_array.sh` | Read mapping and counting |
+| `scripts/step16u_matrix_n88.py` | Count matrix at 88 metagenomes |
 
-Output: results/count_matrix_primary.tsv.gz, results/count_matrix_mapq10.tsv.gz,
-results/mapping_qc_89.tsv, results/supported_reps_95.txt
-
-At 88 metagenomes the analyses use results/count_matrix_primary_n88.tsv.gz:
-the UHM586.41010 column removed and rows restricted to the 2,067,011 clusters
-still supported (scripts/step25a_filter_n88.py). Reads were not remapped, so
-the reference and the column-sum verification above describe the 89-sample
-mapping; the mapped fractions and detected-gene counts are given for the 88
-metagenomes (results/mapping_qc_88.tsv, results/count_matrix_mapq10_n88.tsv.gz).
+Output: `results/count_matrix_primary_n88.tsv.gz`, `results/mapping_qc_88.tsv`
 
 ### Step 17. Treatment, maternal origin and time
 
