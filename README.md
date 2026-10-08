@@ -437,9 +437,3 @@ HMMER 3.4 (Pfam), BBTools read statistics, Python 3.9 with NumPy 1.26.4.
     results/   summary tables
     catalog/   protein catalog and databases, not tracked
     logs/      job logs, not tracked
-
-## Conventions
-
-No count is stated without the output file that produced it. Coverage mode is stated explicitly for every search. Cluster-level claims
-are made on support-filtered clusters, and cohort comparisons at matched
-sampling effort.
