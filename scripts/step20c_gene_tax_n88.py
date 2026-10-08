@@ -1,0 +1,77 @@
+# Step 20c n88: copy of step20c_gene_tax.py on results/fourway_classes_n88.tsv.
+# Stem coverage is reported against the 88 metagenomes; contig files are still
+# looked up for every stem, since a kept representative can be a UHM586.41010
+# gene (UHM586.41010 has no uniref50_lca.tsv, so such genes get no taxonomy).
+# Step 20c: taxonomy of each supported gene from its contig's LCA assignment.
+# Gene IDs are stem__contig_gene, so the contig is recoverable from the ID.
+# Coverage limited to the stems that have a uniref50_lca.tsv file.
+# Contig files are read as .tsv or .tsv.gz: UHM102.10840_uniref50_lca.tsv was gzipped
+# in place on 2026-09-23 (file dated 2024-12-04), after the 89 run read it as .tsv.
+import os, collections, gzip
+def lca_file(FEC, s):
+    f = "%s/%s/%s_uniref50_lca.tsv" % (FEC, s, s)
+    if os.path.exists(f): return f
+    return f + ".gz" if os.path.exists(f + ".gz") else None
+W="/bigdata/stajichlab/lshad003/wf_protein_space"
+FEC="/bigdata/stajichlab/shared/projects/Herptile/Metagenome/Fecal/results_scaffold_classify_mmseqs"
+
+cls={}
+with open(W+"/results/fourway_classes_n88.tsv") as fh:
+    next(fh)
+    for ln in fh:
+        p=ln.rstrip("\n").split("\t"); cls[p[0]]=p[1]
+print("supported genes:",len(cls),flush=True)
+
+stems=(open(W+"/metadata/wf22_stems_44.txt").read().split()
+     + open(W+"/metadata/wf23_stems.txt").read().split()
+     + open(W+"/metadata/wf24_stems.txt").read().split())
+
+tax={}
+have=0
+for i,s in enumerate(stems,1):
+    f=lca_file(FEC,s)
+    if f is None: continue
+    have+=1
+    for ln in (gzip.open(f,"rt") if f.endswith(".gz") else open(f)):
+        p=ln.rstrip("\n").split("\t")
+        if len(p)<10: continue
+        tax[s+"__"+p[0]] = (p[2], p[3], p[9])
+    if i%20==0: print("stems",i,"with tax",have,flush=True)
+print("stems with taxonomy:",have,"of",len(stems))
+n88=[s for s in stems if s!="UHM586.41010"]
+print("stems with taxonomy among the 88:",sum(1 for s in n88 if lca_file(FEC,s)),"of",len(n88))
+print("contigs with taxonomy:",len(tax),flush=True)
+
+def contig_of(g):
+    stem,rest = g.split("__",1)
+    parts = rest.rsplit("_",1)
+    return stem+"__"+parts[0]
+
+def domain(lin):
+    for t in lin.split(";"):
+        if t.startswith("d_"): return t[2:]
+    return "unclassified"
+
+out=open(W+"/results/gene_taxonomy_n88.tsv","w")
+out.write("rep\tclass4\trank\tname\tdomain\n")
+dom=collections.defaultdict(collections.Counter)
+notax=collections.Counter()
+for g,c in cls.items():
+    t=tax.get(contig_of(g))
+    if t is None:
+        notax[c]+=1; continue
+    d=domain(t[2])
+    dom[c][d]+=1
+    out.write("%s\t%s\t%s\t%s\t%s\n"%(g,c,t[0],t[1],d))
+out.close()
+
+print("\n=== domain assignment by class (of genes with a classified contig) ===")
+for c in ["K","KWP","GU","EU"]:
+    tot=sum(dom[c].values())
+    if not tot: continue
+    top=" ".join("%s:%.1f%%"%(k,100.0*v/tot) for k,v in dom[c].most_common(5))
+    print("%-5s n=%-9d %s"%(c,tot,top))
+print("\ngenes with no contig taxonomy:", dict(notax))
+ng=sum(sum(dom[c].values()) for c in dom)
+print("genes with contig taxonomy: %d of %d (%.1f%%)"%(ng,len(cls),100.0*ng/len(cls)))
+print("wrote results/gene_taxonomy_n88.tsv")
