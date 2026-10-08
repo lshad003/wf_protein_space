@@ -394,70 +394,36 @@ Members of these families are 6.29% of supported unannotated genes.
 
 Output: `results/unk_family_neighbours_n88.tsv`
 
-### Step 22. Community-level and targeted tests of treatment
+### Step 22. Community-level tests
 
-Per-gene tests answer whether individual genes respond. They do not answer
-whether the community as a whole shifts, and a signal confined to a small
-functional class could be diluted across hundreds of thousands of genes. Three
-further designs address both, and the permutation scheme is treated as part of
-the design rather than a default.
+Whole-community gene abundance (Bray-Curtis on Hellinger-transformed counts) and
+gene presence (Jaccard, at least five reads) were tested with PERMANOVA. In WF22,
+between-animal terms (treatment, egg mass) were tested by permuting whole animals
+(42 samples, 14 animals) and on animal centroids (15 animals); month was permuted
+within animals. A Pfam-defined carbohydrate subset (59,297 representatives, 7,891
+tested) was analysed the same way and per gene.
 
-**Permutation has to match the design.** Treatment and egg mass are constant
-within an animal, so a scheme that permutes freely inside animal blocks never
-moves those labels and returns a meaningless result. Between-animal terms are
-therefore tested by permuting whole animals, which vegan allows only on a
-balanced design, so the one animal with two samples is dropped, leaving 42
-samples from 14 animals. Month varies within an animal and is permuted inside
-animals. An earlier run using block permutation for all three terms is
-superseded.
-
-**Composition does not shift with treatment.** On Bray-Curtis distances over
-Hellinger-transformed abundances, treatment explains 5.1% of variation with
-whole-animal permutation (p = 0.928) and 6.9% on animal centroids, which
-collapses the repeated measures to 15 independent units (p = 0.657). In WF24,
-where 34 animals are each sampled once, treatment R2 is 0.173 (p = 0.679), at
-the chance level expected for 6 of 33 degrees of freedom.
-Constrained ordination on treatment, conditioning out egg mass and month,
-recovers no significant axis.
-
-**Nor does gene presence.** Scoring a gene as present at five or more reads
-gives 1,637,544 genes that vary across samples, a mean of 523,226 per sample.
-On Jaccard distances, treatment explains 6.2% (p = 0.665) and 10.6% on animal
-centroids (p = 0.465), and in WF24 R2 0.170 (p = 0.770, 34 animals, chance level). The number of genes
-detected per sample does not differ by treatment (p = 0.3676).
-
-**Nor the carbohydrate subset, where an effect was most plausible.** No CAZy
-annotation exists for this catalogue, so the subset is defined by Pfam family
-name, a looser proxy: 59,297 representatives, of which 7,891 are present in at
-least 35 of 44 samples. Blocked per-gene testing returns zero genes for both
-treatments, against 1,541 and 2,046 for egg mass and 1,761 and 2,586 for month
-in the same subset. Composition of the subset gives treatment 5.3%
-(p = 0.454) against egg mass 67.3% (p = 0.001), and total carbohydrate
-abundance does not differ (p = 0.3181).
-
-**Maternal origin does shift composition.** Egg mass explains 32.7% of
-variation under whole-animal permutation and 51.3% on animal centroids, both
-p = 0.001, and its group dispersions do not differ (p = 0.214), so this is a
-difference in composition rather than in variability. Month explains 12.7%
-(p = 0.001).
-
-**One caveat on the negative.** Treatment groups do differ in dispersion
-(p = 0.003) while their centroids do not, so the groups vary in how much they
-vary. This is reported rather than interpreted.
+**Result.**
+- Treatment: R2 0.051 (p = 0.928) by whole-animal permutation and 0.069
+  (p = 0.657) on centroids; presence R2 0.062 (p = 0.665) and 0.106 (p = 0.465).
+  In WF24 (34 animals) R2 is 0.173 (p = 0.679) and 0.170 for presence
+  (p = 0.770), at chance level for 6 of 33 degrees of freedom. Genes detected per
+  sample do not differ (p = 0.3676).
+- Egg mass: R2 0.327 by whole-animal permutation and 0.513 on centroids
+  (both p = 0.001), with equal dispersions (p = 0.214). Month: R2 0.127 (p = 0.001).
+- Carbohydrate subset: zero genes respond to treatment, against 1,541 and 2,046 for
+  egg mass and 1,761 and 2,586 for month; composition gives treatment R2 0.053
+  (p = 0.454) and egg mass 0.673 (p = 0.001).
+- Treatment groups differ in dispersion (p = 0.003) but not in centroid.
 
 | File | Purpose |
 |---|---|
-| scripts/step22b_permanova_fix.R | Composition tested under three permutation designs; 89 metagenomes, superseded by scripts/step22b_permanova_fix_n88.R |
-| scripts/step22b_permanova_fix_n88.R | Composition under three permutation designs, 88-metagenome matrix |
-| scripts/step22c_jaccard.R | Presence/absence composition and gene richness; 89 metagenomes, superseded by scripts/step22c_jaccard_n88.R |
-| scripts/step22c_jaccard_n88.R | Presence/absence composition and gene richness, 88-metagenome matrix |
-| scripts/step22e_permanova_wf24_n34.R | WF24 abundance and presence/absence composition, 34 animals; 89 metagenomes, superseded by scripts/step22e_permanova_wf24_n34_n88.R |
-| scripts/step22e_permanova_wf24_n34_n88.R | WF24 composition, 34 animals, 88-metagenome matrix |
-| scripts/step22d_cazy_subset.R | Carbohydrate subset tested per gene and by composition; 89 metagenomes, superseded by scripts/step22d_cazy_subset_n88.R |
-| scripts/step22d_cazy_subset_n88.R | Carbohydrate subset per gene and by composition, 88-metagenome matrix |
+| `scripts/step22b_permanova_fix_n88.R` | Abundance composition, WF22 |
+| `scripts/step22c_jaccard_n88.R` | Presence composition and richness, WF22 |
+| `scripts/step22e_permanova_wf24_n34_n88.R` | Abundance and presence composition, WF24 |
+| `scripts/step22d_cazy_subset_n88.R` | Carbohydrate subset |
 
-Output: logs step22b, step22c, step22d and step22e; results/limma_cazy_*.csv;
-at 88: logs step22b_n88 to step22e_n88, results/limma_cazy_*_n88.csv
+Output: logs `step22b_n88` to `step22e_n88`, `results/limma_cazy_*_n88.csv`
 
 ## Planned steps
 
