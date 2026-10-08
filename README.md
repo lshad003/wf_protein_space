@@ -248,46 +248,25 @@ Output: `results/union_rep_level_n88.tsv`, `results/family_union_dark_n88.tsv`,
 
 ### Step 13. Genomic and environmental unknowns
 
-The unannotated representatives are searched against NCBI ClusteredNR to
-separate genes that exist in sequenced genomes but have no assigned function
-from genes that appear nowhere. The database is hard-coded after inspecting it
-with dbinfo rather than selected by a glob, because the database defines the
-boundary being reported. Hits are recorded loosely and the criterion is applied
-afterwards, so alternatives can be compared without repeating the search.
+The 585,347 unannotated supported representatives were searched against NCBI
+ClusteredNR (release 20260128, 470,748,714 sequences) with DIAMOND 2.1.24
+--very-sensitive. A hit requires E <= 1e-10 with at least 50% coverage of both
+query and subject.
 
-**The search.** 586,215 supported unknown representatives against
-nr_cluster_seq 20260128 (470,748,714 sequences) with DIAMOND 2.1.24
---very-sensitive, recording up to five targets per query at E <= 1e-3.
-Thirteen hours on 32 cores with the database staged to node-local scratch.
-At 88 metagenomes 585,347 of these remain supported and are classified from
-the same search.
-
-**The criterion matters.** Loose to strict, the environmental unknown count
-runs 374,133 (63.92%) at E <= 1e-5 with no coverage requirement, 430,301
-(73.51%) at E <= 1e-10 with query and subject coverage at least 50%, and
-448,567 (76.63%) at E <= 1e-20 under the same coverage. The middle criterion
-is adopted, since coverage on both sides prevents a short shared motif from
-counting as a match.
-
-**Main result.** Of the supported catalogue, 430,299 representatives (20.82%)
-have no hit in a database of 470 million proteins. The genomic unknowns,
-155,048 representatives (7.50%), mostly match sequences that are themselves
-labelled hypothetical, so they are recognised without being characterised.
-Mobile element titles account for 3,954 of the 211,712 loose hits (1.9%).
+**Result.** 430,299 representatives (20.82% of the supported catalog) have no hit
+in ClusteredNR (environmental unknowns). 155,048 (7.50%) match only sequences
+annotated as hypothetical (genomic unknowns). Across looser and stricter criteria
+the environmental unknown share ranges from 63.92% to 76.63% of unannotated
+representatives.
 
 | File | Purpose |
 |---|---|
-| scripts/step13e_db_readability.sh | Candidate databases inventoried and checked for readability |
-| scripts/step13d_extract_u.py | Unannotated representatives extracted to fasta |
-| scripts/step13f_nrclust_search.sh | Search against ClusteredNR submitted |
-| scripts/step13h_gu_eu_split.sh | Split reported under several stated criteria; 89 metagenomes, superseded by scripts/step13h_gu_eu_split_n88.sh |
-| scripts/step13h_gu_eu_split_n88.sh | Split under the same criteria, supported unknowns at 88 metagenomes |
-| scripts/step13h_gu_eu_split_89log.sh | Unchanged step13h run once more to record its 89-sample output in a log |
-| scripts/step13i_fourway.py | Four-way classification assembled with per-class properties; 89 metagenomes, superseded by scripts/step13i_fourway_n88.py |
-| scripts/step13i_fourway_n88.py | Four-way classification, 88 metagenomes |
+| `scripts/step13d_extract_u.py` | Unannotated representatives to fasta |
+| `scripts/step13f_nrclust_search.sh` | DIAMOND search against ClusteredNR |
+| `scripts/step13h_gu_eu_split_n88.sh` | Genomic and environmental split under several criteria |
+| `scripts/step13i_fourway_n88.py` | Final four-class labels |
 
-Output: results/step13_nrclust20260128_hits.tsv, results/fourway_classes.tsv; at 88:
-results/fourway_classes_n88.tsv
+Output: `results/step13_nrclust20260128_hits.tsv`, `results/fourway_classes_n88.tsv`
 
 ### Step 14. Structure of the unknown fraction
 
