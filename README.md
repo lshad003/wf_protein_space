@@ -186,26 +186,25 @@ supports using the 2,067,011 supported clusters as the catalog.
 
 Output: `results/orf_completeness_n88.tsv`
 
-### Step 10. Functional annotation and the unannotated fraction
+### Step 10. The unannotated fraction (eggNOG)
 
-The 6,171,602 gene-level representatives are annotated against eggNOG, and the
-annotated fraction is examined against cluster size and against open reading
-frame completeness. Annotation is then rolled up to the 50% family tier, where
-support filters are applied so that the unannotated fraction is comparable to
-published catalogs.
+eggNOG annotation of the 6,171,602 representatives was summarized by cluster size
+and completeness, then carried to the 50% family level with support filters.
 
-**Main result.** 48.29% of gene-level representatives carry an eggNOG assignment, closely matching the 47.2% obtained for the earlier WF22-only catalog on the same database. Annotation rises with cluster support, from 36.83% for singletons to 90.53% for clusters of twenty-one or more. Annotation does not track open reading frame completeness in the expected direction: within every cluster-size bin below twenty-one members, proteins spanning an entire short contig annotate better than complete open reading frames (65.1% against 40.4% among singletons), so the partial flag is not a proxy for sequence quality and discarding partial calls would preferentially remove well-characterized sequence. At the 50% family tier, 76.03% of all families have no annotated member; after requiring at least three members from at least two metagenomes this falls to 55.40% of 1,020,958 families, and requiring three metagenomes changes it by less than 0.1 percentage points. The supported unannotated fraction is therefore stable at roughly 55%, higher than reported for the global microbial gene catalog, the ocean microbial reference gene catalog, or the AGNOSTOS gene-cluster classification, leaving 565,611 supported unannotated families as candidates for novel family calling.
+**Result.** 48.29% of representatives are annotated, rising from 36.83% for
+singletons to 90.53% for clusters of twenty-one or more. Proteins spanning a
+whole short contig annotate better than complete open reading frames (65.1%
+against 40.4% among singletons), so partial calls are not low-quality sequence.
+At the family level, 76.03% of all families have no eggNOG-annotated member,
+falling to 55.40% of the 1,020,958 supported families (565,611 families); the
+value changes by less than 0.1 percentage points with a stricter support filter.
 
 | File | Purpose |
 |---|---|
-| `scripts/step8f_eggnog_v2.sh` | eggNOG annotation, database staged node-local |
-| `scripts/step10_annotation_summary.sh` | Annotated fraction by cluster size and completeness; 89 metagenomes, superseded by `scripts/step10_annotation_summary_n88.sh` |
-| `scripts/step10_annotation_summary_n88.sh` | Annotated fraction by cluster size and completeness, 88 metagenomes |
-| `scripts/step11_interaction_and_supported.sh` | Completeness within cluster size, family-tier dark fraction under support filters; 89 metagenomes, superseded by `scripts/step11_interaction_and_supported_n88.sh` |
-| `scripts/step11_interaction_and_supported_n88.sh` | Family-tier dark fraction under support filters, 88 metagenomes |
+| `scripts/step10_annotation_summary_n88.sh` | Annotated fraction by cluster size and completeness |
+| `scripts/step11_interaction_and_supported_n88.sh` | Family-level unannotated fraction under support filters |
 
-Output: `results/annotation_summary.tsv`, `results/family_dark_fraction.tsv`; at 88:
-`results/annotation_summary_n88.tsv`, `results/family_dark_fraction_n88.tsv`
+Output: `results/annotation_summary_n88.tsv`, `results/family_dark_fraction_n88.tsv`
 
 ### Step 11. Taxonomic composition of the annotated fraction
 
