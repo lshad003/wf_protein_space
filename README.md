@@ -359,33 +359,21 @@ Output: `results/completeness_by_class_n88.tsv`, `results/prevalence_primary_n88
 
 ### Step 20. Taxonomic context of the unknown fraction
 
-Short unannotated proteins carry little taxonomic signal on their own, so
-taxonomy is inherited from the contig each gene sits on, using assignments made
-upstream against UniRef50. The question is not what species these genes come
-from, which the data cannot answer, but whether unannotated genes sit in more
-taxonomically obscure genomic neighbourhoods than annotated ones.
+Each gene inherited the taxonomy of its contig, from existing UniRef50-based
+contig assignments, to ask whether unannotated genes sit on less classifiable DNA.
 
-**Coverage.** Contig assignments exist for 48 of 88 samples, giving taxonomy
-for 888,183 of 2,067,011 genes, 42.97%. Every figure below is conditional on
-that subset and the comparison between classes carries the result, not the
-absolute values.
-
-**Unannotated genes sit on more obscure contigs.** Contigs are unclassified for
-74.6% of K genes, 74.6% of KWP, 74.4% of GU and 91.6% of EU. Among the genes
-whose contigs are classified, the environmental unknowns also invert the usual
-pattern: 4.5% eukaryotic against 3.9% bacterial, where the other three classes
-run about 23% bacterial and 2% eukaryotic. Genes with no database match are
-therefore embedded in DNA that is itself taxonomically orphan, which is what
-lineages without sequenced relatives would produce.
+**Result.** Contig taxonomy is available for 48 of 88 metagenomes, covering
+888,183 of 2,067,011 genes (42.97%). Contigs are unclassified for 74.6% of K and
+KWP genes, 74.4% of GU and 91.6% of EU genes. EU genes are 4.5% eukaryotic and
+3.9% bacterial, against about 23% bacterial and 2% eukaryotic in the other
+classes. Genes with no database match sit on DNA that is itself largely
+unclassified, consistent with lineages lacking sequenced relatives.
 
 | File | Purpose |
 |---|---|
-| scripts/step20a_tax_recon.sh | Existing scaffold classifications located and checked |
-| scripts/step20b_contig_tax.sh | Assignment file format and coverage verified |
-| scripts/step20c_gene_tax.py | Contig taxonomy inherited by gene and summarized by class; 89 metagenomes, superseded by scripts/step20c_gene_tax_n88.py |
-| scripts/step20c_gene_tax_n88.py | Contig taxonomy by gene, 88 metagenomes; reads .tsv or .tsv.gz contig files |
+| `scripts/step20c_gene_tax_n88.py` | Contig taxonomy by gene and class |
 
-Output: results/gene_taxonomy.tsv; at 88: results/gene_taxonomy_n88.tsv
+Output: `results/gene_taxonomy_n88.tsv`
 
 ### Step 21. Gene neighbourhood of unknown families
 
