@@ -206,20 +206,24 @@ value changes by less than 0.1 percentage points with a stricter support filter.
 
 Output: `results/annotation_summary_n88.tsv`, `results/family_dark_fraction_n88.tsv`
 
-### Step 11. Taxonomic composition of the annotated fraction
+### Step 11. Taxonomy of the annotated fraction
 
-Broad clade is read from the eggNOG orthologous group assignments of the
-annotated representatives, and examined against cluster size, since host and
-dietary sequence would be expected to concentrate in poorly supported clusters.
+Broad clade was taken from eggNOG assignments of annotated representatives and
+compared across cluster sizes.
 
-**Main result.** The annotated fraction is overwhelmingly bacterial: 92.64% Bacteria, 6.93% Eukaryota, 0.27% Archaea and 0.16% Viruses of 2,980,052 annotated representatives. The most frequent assignment levels are Alphaproteobacteria 16.30%, Bacteroidetes 13.95%, Actinobacteria 13.34%, Gammaproteobacteria 11.44% and Betaproteobacteria 10.31%, with Metazoa at 3.05% and Fungi at 2.57%. Eukaryotic assignment declines with cluster support, from 7.63% among singletons to 3.61% among clusters of twenty-one or more, consistent with host and dietary sequence being present but sparse and poorly replicated. This applies to annotated proteins only; the unannotated fraction carries no taxonomic assignment and its composition is not established by this analysis.
+**Result.** Of 2,980,052 annotated representatives, 92.64% are bacterial, 6.93%
+eukaryotic, 0.27% archaeal and 0.16% viral. The most common groups are
+Alphaproteobacteria (16.30%), Bacteroidetes (13.95%), Actinobacteria (13.34%),
+Gammaproteobacteria (11.44%) and Betaproteobacteria (10.31%); Metazoa are 3.05%
+and Fungi 2.57%. Eukaryotic share falls from 7.63% in singletons to 3.61% in
+clusters of twenty-one or more, so host and dietary sequence is present but
+sparse. The unannotated fraction has no taxonomic assignment from this analysis.
 
 | File | Purpose |
 |---|---|
-| `scripts/step13_taxonomy.sh` | Broad clade and assignment level, against cluster size; 89 metagenomes, superseded by `scripts/step13_taxonomy_n88.sh` |
-| `scripts/step13_taxonomy_n88.sh` | Broad clade and assignment level, 88 metagenomes |
+| `scripts/step13_taxonomy_n88.sh` | Clade and assignment level by cluster size |
 
-Output: `results/taxonomy_summary.tsv`; at 88: `results/taxonomy_summary_n88.tsv`
+Output: `results/taxonomy_summary_n88.tsv`
 
 ### Step 12. Annotation coverage and the four-way classification
 
