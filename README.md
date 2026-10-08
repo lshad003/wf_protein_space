@@ -156,20 +156,18 @@ proteins, so the catalog is not saturated.
 
 Output: `results/rarefaction_95_n88.tsv`
 
-### Step 8. Functional annotation
+### Step 8. Annotation
 
-Gene-level representatives are annotated against eggNOG to establish the
-annotated and unannotated fractions of the catalog. The reference database is
-staged to node-local storage, since concurrent access to the shared copy stalls
-the annotation phase entirely. Annotation from a stored hits table fails in both
-available versions of the mapper, so every chunk is run end to end.
+Representatives at 95% identity were annotated with eggNOG-mapper and with Pfam
+using hmmsearch.
+
+**Result.** eggNOG annotates 2,980,052 of 6,171,602 representatives (48.29%) and
+Pfam 2,709,544 (43.90%).
 
 | File | Purpose |
 |---|---|
-| `scripts/step8a_annot_preflight.sh` | Available tools, databases and reference invocations |
-| `scripts/step8e_test.sh` | Full run against hits-table reuse, two mapper versions |
-| `scripts/step8f_eggnog_v2.sh` | eggNOG annotation, database staged node-local |
-| `scripts/step12b_pfam_hmmsearch.sh` | Pfam annotation via hmmsearch |
+| `scripts/step8f_eggnog_v2.sh` | eggNOG annotation |
+| `scripts/step12b_pfam_hmmsearch.sh` | Pfam annotation |
 
 ### Step 9. Open reading frame completeness
 
