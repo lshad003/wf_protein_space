@@ -171,20 +171,20 @@ Pfam 2,709,544 (43.90%).
 
 ### Step 9. Open reading frame completeness
 
-Prodigal records whether each predicted protein runs to a start and a stop codon
-or is truncated at a contig edge. These flags are read from the original
-per-sample protein files, since the renaming step removed them, and completeness
-is reported for the catalog as a whole, for the representatives, and against
-cluster size.
+Prodigal flags whether each protein has both a start and a stop codon or is
+truncated at a contig edge. Completeness was summarized overall and by cluster size.
 
-**Main result.** 46.89% of the 40,257,962 predicted proteins are complete open reading frames, within the range reported for other gut gene catalogs. Completeness of the 95% representatives is lower at 35.33%, and rises monotonically with cluster size: 11.58% for singletons, 32.98% for clusters of two, 61.16% for three to five, 81.99% for six to twenty, and 86.11% for twenty-one or more. Singleton clusters are therefore dominated by contig-edge fragments rather than by rare or novel proteins, since a gene broken across contigs yields fragments that cannot cluster with the intact sequence. This supports treating the support-filtered set of 2,067,011 clusters as the analytical catalog, and means that continued accumulation in the rarefaction curve partly reflects fragment accumulation rather than gene discovery.
+**Result.** 46.89% of the 40,257,962 proteins are complete. Among 95%
+representatives, completeness rises with cluster size: 11.58% for singletons,
+32.98% for pairs, 61.16% for three to five, 81.99% for six to twenty and 86.11%
+for twenty-one or more. Singletons are mostly contig-edge fragments, which
+supports using the 2,067,011 supported clusters as the catalog.
 
 | File | Purpose |
 |---|---|
-| `scripts/step9_orf_completeness.sh` | Partial flags extracted, completeness against cluster size; 89 metagenomes, superseded by `scripts/step9_orf_completeness_n88.sh` |
-| `scripts/step9_orf_completeness_n88.sh` | Completeness against cluster size, 88 metagenomes |
+| `scripts/step9_orf_completeness_n88.sh` | Completeness by cluster size |
 
-Output: `results/orf_completeness.tsv`; at 88: `results/orf_completeness_n88.tsv`
+Output: `results/orf_completeness_n88.tsv`
 
 ### Step 10. Functional annotation and the unannotated fraction
 
