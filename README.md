@@ -48,30 +48,24 @@ Output: `results/supported_reps_95_n88.txt`, `results/count_matrix_primary_n88.t
 
 ### Step 1. Gene prediction and catalog input
 
-Per-sample assembled contigs are translated with Prodigal in metagenomic mode,
-and headers renamed so every protein carries its source metagenome. Predictions
-existed for 31 of the 45 WF23 and WF24 metagenomes; the remaining 14 were
-predicted with the same tool version and parameters.
+Proteins were predicted from per-sample assembled contigs with Prodigal in
+metagenomic mode, with headers carrying the source metagenome. For 31 of the 45
+WF23 and WF24 metagenomes, existing predictions made with the same version and
+parameters were reused.
 
-**Main result.** 24,151,134 proteins from the 45 WF23 and WF24 metagenomes
-(WF23 3,642,871; WF24 20,508,263), joining 16,399,461 from the 44 WF22
-metagenomes for a catalog input of 40,550,595. Gene density per unit of
-assembled sequence is constant across prediction batches (median 4,580 proteins
-per Mb for pre-existing predictions against 4,602 for those predicted here,
-range 4,047 to 4,969), so the two runs are interchangeable. UHM585.41009 is a
-low outlier at 313,220 proteins from a 64 Mb assembly. UHM586.41010 (292,633
-proteins, the lowest WF24 yield) was removed from the catalog afterwards; see
-Sample set.
+**Main result.** The 45 WF23 and WF24 metagenomes contribute 24,151,134 proteins
+(WF23 3,642,871; WF24 20,508,263) and the 44 WF22 metagenomes 16,399,461, for a
+clustering input of 40,550,595 from 89 metagenomes; removing UHM586.41010
+(292,633 proteins) gives 40,257,962 at 88. Gene density is constant across
+prediction batches (median 4,580 and 4,602 proteins per Mb, range 4,047 to
+4,969), so protein yield per sample tracks assembly size.
 
 | File | Purpose |
-|------|---------|
-| `scripts/step0_check_existing_predictions.sh` | Which metagenomes already had predictions |
-| `scripts/step0b_check_by_assembly.sh` | Per-stem inventory of existing protein files |
-| `scripts/step0c_locate_predict_script.sh` | Locate prediction pipeline, confirm tool version |
-| `scripts/step1b_preflight.sh` | Contig files confirmed for the 14 missing metagenomes |
-| `scripts/step1c_prodigal_array.sh` | Prodigal, 14 metagenomes |
-| `scripts/step1d_rename_45.sh` | Biosample-prefixed headers, all 45 |
-| `scripts/step1e_protein_counts.sh` | Per-sample protein counts against assembly size |
+|---|---|
+| `scripts/step0_check_existing_predictions.sh`, `step0b_check_by_assembly.sh`, `step0c_locate_predict_script.sh`, `step1b_preflight.sh` | Inventory of existing predictions and input contigs |
+| `scripts/step1c_prodigal_array.sh` | Prodigal on the 14 remaining metagenomes |
+| `scripts/step1d_rename_45.sh` | Headers prefixed with source metagenome |
+| `scripts/step1e_protein_counts.sh` | Protein counts against assembly size |
 
 Output: `results/step1_protein_counts_45.tsv`, `results/step0_by_assembly_check.tsv`
 
