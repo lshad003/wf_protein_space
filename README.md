@@ -61,22 +61,19 @@ one WF24 sample.
 
 Output: `results/step1_protein_counts_45.tsv`
 
-### Step 2. Catalog construction
+### Step 2. Clustering
 
-All 40,550,595 proteins clustered at three amino-acid identity thresholds in one
-run. A database completeness check runs before clustering, after a truncated
-database was detected in an earlier attempt.
+Proteins were clustered with MMseqs2 at 95%, 90% and 50% amino-acid identity.
 
-**Main result.** 6,182,117 representatives at 95% identity, 5,361,227 at 90%,
-2,922,537 at 50%. Catalog is `catalog/db/LsPS_AA`. After removing the
-UHM586.41010 members, 6,171,602 clusters remain at 95% and 2,918,630 at 50%.
+**Result.** 6,171,602 clusters at 95% identity, 5,352,641 at 90% and 2,918,630
+families at 50%.
 
 | File | Purpose |
-|------|---------|
-| `scripts/step2_cluster.sh` | Input assembly, database build, clustering at three tiers |
-| `scripts/step2a_preflight.sh` | Tool version, database format, disk headroom |
+|---|---|
+| `scripts/step2_cluster.sh` | Database build and clustering at three thresholds |
+| `scripts/step25b_membership_n88.py` | Cluster tables at 88 metagenomes |
 
-Output: `catalog/db/LsPS_AA_{95,90,50}_rep.fasta`
+Output: `catalog/db/LsPS_AA_{95,90,50}_cluster`, `results/clusters_{95,90,50}_n88.tsv`
 
 ### Step 3. Search-based coverage of the earlier catalog
 
