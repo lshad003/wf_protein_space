@@ -105,18 +105,19 @@ clusters to 20.06% of supported clusters, and to 26.00% at family level. The top
 | `scripts/step3_cluster_composition_n88.sh` | Cohort composition of each cluster |
 | `scripts/step4_nonsingleton_n88.sh` | Support filter and cluster size distribution |
 
-### Step 5. Cohort contribution at matched sampling effort
+### Step 5. Cohorts compared at equal sampling effort
 
-Cohorts differ in metagenome count, so cohort-exclusive cluster counts partly
-measure sequencing effort rather than cohort identity. Cohorts are compared at
-equal numbers of metagenomes across repeated random draws.
+Cohorts differ in metagenome count, so they were compared at 9 metagenomes each,
+averaged over 10 random draws.
 
-**Main result.** At 9 metagenomes per cohort across 10 draws, WF22-exclusive clusters fall from 15.27% to 9.52% once the sample-count advantage is removed, while WF24-exclusive remains 25.28% and clusters shared by all three cohorts are 24.33%. Per-cohort richness at 9 metagenomes is 765,122 clusters for WF22, 1,166,662 for WF23 and 2,080,538 for WF24, tracking per-sample protein yield rather than cohort identity. Draws are seeded; with 35 WF24 metagenomes the same seeds select different WF24 animals, so the WF24 figures reflect a different draw as well as the removal of UHM586.41010.
+**Result.** WF22-exclusive clusters fall from 15.27% to 9.52% at equal effort;
+WF24-exclusive clusters are 25.28%, and 24.33% are shared by all three cohorts.
+Richness at 9 metagenomes is 765,122 clusters for WF22, 1,166,662 for WF23 and
+2,080,538 for WF24, tracking per-sample protein yield rather than cohort.
 
 | File | Purpose |
 |---|---|
-| `scripts/step5_equaln_rarefaction.sh` | Equal-n cohort comparison and per-cohort accumulation; 89 metagenomes, superseded by `scripts/step5_equaln_rarefaction_n88.sh` |
-| `scripts/step5_equaln_rarefaction_n88.sh` | Equal-n comparison and per-cohort accumulation, 88 metagenomes, same seeds |
+| `scripts/step5_equaln_rarefaction_n88.sh` | Equal-effort comparison and per-cohort accumulation |
 
 ### Step 6. Batch structure
 
