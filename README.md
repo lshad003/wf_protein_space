@@ -137,23 +137,24 @@ from batch.
 
 Output: `results/batch_table_88.tsv`
 
-### Step 7. Depth-normalized rarefaction
+### Step 7. Rarefaction
 
-Because assembled sequence per metagenome is the dominant technical variable,
-accumulation is measured against proteins sampled rather than metagenomes
-sampled, and WF24 is split by sequencing run so that cohort and run are not
-conflated.
+Clusters were accumulated against proteins sampled rather than metagenomes, with
+WF24 split by sequencing run so that cohort and run are not conflated.
 
-**Main result.** At 3,600,000 proteins WF22 gives 1,169,677 clusters and WF23 1,159,262, a 0.9% difference. WF24 gives 1,295,364 in one run and 1,687,560 in the other, so the same cohort differs by 30.3% across runs while different cohorts within one run differ by 11.7%. Sequencing run, not cohort, is the dominant driver of catalog richness. The pooled curve reaches 6,171,602 clusters at 40,257,962 proteins and is still adding 436,425 clusters between 35 and 40 million proteins, so gene-level protein space is not saturated.
+**Result.** At 3,600,000 proteins, WF22 and WF23 give 1,169,677 and 1,159,262
+clusters (0.9% apart). WF24 gives 1,295,364 and 1,687,560 in its two runs (30.3%
+apart), while WF23 and WF24 within one run differ by 11.7%. Sequencing run, not
+cohort, drives richness. The pooled curve reaches 6,171,602 clusters at
+40,257,962 proteins and still adds 436,425 clusters between 35 and 40 million
+proteins, so the catalog is not saturated.
 
 | File | Purpose |
 |---|---|
-| `scripts/step7_rarefaction.sh` | Accumulation against proteins sampled, per cohort and pooled; 89 metagenomes, superseded by `scripts/step7_rarefaction_n88.sh` |
-| `scripts/step7_rarefaction_n88.sh` | Accumulation against proteins sampled, 88 metagenomes |
-| `scripts/step7b_wf24_byrun.sh` | Richness at matched depth, WF24 split by run; 89 metagenomes, superseded by `scripts/step7b_wf24_byrun_n88.sh` |
-| `scripts/step7b_wf24_byrun_n88.sh` | Richness at matched depth, WF24 split by run, 88 metagenomes |
+| `scripts/step7_rarefaction_n88.sh` | Accumulation against proteins sampled |
+| `scripts/step7b_wf24_byrun_n88.sh` | Richness at matched depth, WF24 by run |
 
-Output: `results/rarefaction_95.tsv`; at 88: `results/rarefaction_95_n88.tsv`
+Output: `results/rarefaction_95_n88.tsv`
 
 ### Step 8. Functional annotation
 
