@@ -2,18 +2,21 @@ import gzip, csv
 W = "/bigdata/stajichlab/lshad003/wf_protein_space"
 NAME = {"UHM125.35769__k141_151130_2": "DivIVA-like", "UHM636.41030__k141_332084_5": "Cse2/CasB-like",
         "UHM145.35772__k141_106404_54": "HTH-like (weak)", "UHM145.35771__k141_106979_4": "helical repeat-like (weak)"}
-md = {r["stem"]: r for r in csv.DictReader(open(W + "/metadata/samples_89_treatment.tsv"), delimiter="\t")}
+MD, SUP, CM = W + "/metadata/samples_88_treatment.tsv", W + "/results/supported_reps_95_n88.txt", W + "/results/count_matrix_primary_n88.tsv.gz"
+print("inputs: %s, %s, %s" % (MD, SUP, CM))
+md = {r["stem"]: r for r in csv.DictReader(open(MD), delimiter="\t")}
 mem = {q: [] for q in NAME}
 with open(W + "/results/unk_direct30_clusters.tsv") as fh:
     for l in fh:
         f = l.rstrip("\n").split("\t")
         if len(f) != 2: raise SystemExit("unexpected cluster line: %s" % f)
         if f[0] in mem: mem[f[0]].append(f[1])
-sup = set(open(W + "/results/supported_reps_95.txt").read().split())
+sup = set(open(SUP).read().split())
 want = {m: q for q in NAME for m in mem[q] if m in sup}
 cnt, S = {}, []
-with gzip.open(W + "/results/count_matrix_primary.tsv.gz", "rt") as fh:
+with gzip.open(CM, "rt") as fh:
     S = fh.readline().rstrip("\n").split("\t")[1:]
+    if len(S) != 88: raise SystemExit("ABORT: expected 88 samples, got %d" % len(S))
     for l in fh:
         k = l[:l.find("\t")]
         if k in want:
