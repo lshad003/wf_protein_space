@@ -588,10 +588,10 @@ run on the recurrent set.
 Output: `results/prostt5_calib_summary.tsv`, `results/prostt5_main_summary.tsv`,
 `results/prostt5_by_length.tsv`
 
-### Step 25. Predicted structures of EU-only unknown families
+### Step 25. Predicted structures of environmental-only unknown families
 
 ESMFold models were built for family representatives in three groups drawn from
-the 15,580 EU-only unknown families: 218 with a structural hit
+the 15,580 environmental-only unknown families: 218 with a structural hit
 (best E <= 1e-3 against PDB or CATH50), 200 with no hit at E <= 1e-1 in either
 database, ranked by number of animals, then metagenomes, and 200 more no-hit
 families of at least 100 aa not in the first set, ranked the same way. All 618
