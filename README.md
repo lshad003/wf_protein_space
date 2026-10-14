@@ -425,6 +425,69 @@ tested) was analysed the same way and per gene.
 
 Output: logs `step22b_n88` to `step22e_n88`, `results/limma_cazy_*_n88.csv`
 
+### Step 29. Predicted structures of EU-only unknown families
+
+ESMFold models were built for family representatives in three groups drawn from
+the 15,580 EU-only unknown families: 218 with a structural hit
+(best E <= 1e-3 against PDB or CATH50), 200 with no hit at E <= 1e-1 in either
+database, ranked by number of animals, then metagenomes, and 200 more no-hit
+families of at least 100 aa not in the first set, ranked the same way. All 618
+were folded with esm 2.0.0 (esmfold_3B_v1) on CPU only with `--chunk-size 64`;
+618 of 618 completed, exit 0. A model counts as folded at mean pLDDT >= 70 and
+pTM >= 0.5 unless it is helix-only (helix fraction >= 0.8, strand fraction < 0.05);
+below either cutoff it is low confidence.
+
+**Confidence by group.** HIT families (median 129.5 aa) have median pLDDT 62.8
+and pTM 0.50, and 59 of 218 (27.1%) are folded. NOHIT (median 64.5 aa) has median
+pLDDT 49.8 and pTM 0.25, with 5 of 200 (2.5%) folded; NOHIT_LONG (median 133.5 aa)
+has 43.0 and 0.26, with 5 of 200 (2.5%) folded. Restricted to 100 aa and longer,
+HIT gives 43 of 143 folded (30.1%, pLDDT 63.9, pTM 0.53), NOHIT 0 of 42 and
+NOHIT_LONG 5 of 200, so the gap remains when short models are excluded. Most no-hit models are
+low confidence (183 of 200 and 194 of 200).
+
+**Folded no-hit models.** 10 no-hit models are folded (pLDDT 70.1 to 87.5, pTM
+0.502 to 0.844). Four are compact, with radius of gyration 1.00 to 1.18 times the
+value expected for a globular chain of that length (2.2 N^0.38 Å); the other six
+are 1.36 or more. The four were checked on the Foldseek web server, which gave
+the working labels DivIVA-like (99 aa), Cse2/CasB-like (161 aa), HTH-like (weak,
+67 aa) and helical repeat-like (weak, 109 aa). No output was kept from those
+searches; a local Foldseek search with TM-scores is pending. These are structural
+resemblances, not novel folds.
+
+**Presence.** Gene abundance (at least 5 reads on each family's supported 95%
+representative, 88 metagenomes):
+
+| family | metagenomes | animals | WF22 | WF23 | WF24 |
+|---|---|---|---|---|---|
+| DivIVA-like | 59 | 54 | 18/44 | 6/9 | 35/35 |
+| Cse2/CasB-like | 50 | 35 | 28/44 | 6/9 | 16/35 |
+| HTH-like (weak) | 75 | 55 | 31/44 | 9/9 | 35/35 |
+| helical repeat-like (weak) | 40 | 24 | 30/44 | 5/9 | 5/35 |
+
+WF22 was sequenced on separate runs (Step 6), so differences between WF22 and
+the other cohorts cannot be separated from sequencing run.
+
+**Gene neighbourhood.** Pfam domains on genes within three positions of every
+family member were counted. The Cse2/CasB-like family sits in a type I-E cas
+operon: Cse1 (CRISPR_Cse1) and Cas7 (Cas_CT1975) are within one gene in 37 of 37
+members, and Cas5 (Cas_Cas5d) is within three genes in 35 of 37. The DivIVA-like
+family's neighbours are UbiA (47 of 47) and DUF4229 (46 of 47), neither linked
+to cell division, so that label is tentative. The HTH-like family sits beside
+HTH_26 (73 of 73) and Uma2 (72 of 73).
+
+| File | Purpose |
+|---|---|
+| `scripts/step29a_esmfold_input.py` | HIT, NOHIT and NOHIT_LONG representatives |
+| `scripts/step29b_esmfold.sh` | ESMFold, CPU |
+| `scripts/step29_peek_plddt.py` | Interim pLDDT check during the run |
+| `scripts/step29_peek_v2.py` | Confidence, helix and strand fractions, compactness, folded call |
+| `scripts/step29c_fold4_presence.py` | Assembly and read presence of the four compact families |
+| `scripts/step29d_fold4_neighbours.py`, `.sh` | Neighbour domains of the four compact families |
+
+Output: `results/esmfold_input_labels.tsv`, `results/esmfold_pdb/`,
+`results/esmfold_peek_v2.tsv`, `results/step29_fold4_presence.tsv`,
+`results/step29d_fold4_neighbours.tsv`, log `step29b_esmfold.29932169`
+
 ## Software
 
 Prodigal V2.6.3, MMseqs2 13-45111, eggNOG-mapper 2.1.9 (eggNOG 5.0.2),
