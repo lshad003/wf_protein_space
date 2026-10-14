@@ -425,7 +425,170 @@ tested) was analysed the same way and per gene.
 
 Output: logs `step22b_n88` to `step22e_n88`, `results/limma_cazy_*_n88.csv`
 
-### Step 29. Predicted structures of EU-only unknown families
+### Step 21. Unknown proteins against NMPFams2
+
+The unannotated supported representatives were filtered to match the NMPFams2
+family set (Aplakidou et al. 2026): complete open reading frame and at least
+35 aa, leaving 384,260 of 585,347 (65.65%). These were searched with MMseqs2
+(`search -e 1e-3 --min-seq-id 0.3 -c 0.7 --cov-mode 0`, default -s 5.7) against
+the representatives of NMPFams2 metagenome families (6,588,876) and isolate
+families (2,229,233), each with at least 25 members. Coverage mode 0 (both
+sequences) is used here rather than mode 2 because NMPFams2 families are built at
+80% coverage of both sequences. A protein is represented if it has any hit.
+
+**Result.** 1,787 of 266,848 environmental unknowns (0.67%) are represented in
+either set (1,272 metagenome, 535 isolate, 20 both), so 99.33% match neither.
+Genomic unknowns are represented far more often: 37,821 of 117,412 (32.21%),
+mostly through isolate families (34,421). Over all 384,260 proteins, 39,608
+(10.31%) are represented. Isolate families come from reference genomes and hold
+annotated and unannotated proteins, so a match to one is not a match to an
+uncharacterized family.
+
+**Search sensitivity.** Searching representatives only underestimates matches. For
+10,000 random queries (seed 26), 151 hit a metagenome family representative and
+233 hit any member (1.51% against 2.33%); for isolate families 901 against 973.
+In a positive control, 5,000 random non-representative NMPFams2 metagenome members
+found their own family's representative in 4,873 cases (97.46%). Recovery stays
+high for short queries (2,997 of 3,089 under 100 aa, 97.02%; control median
+83 aa), and environmental unknowns are no shorter (median 94 aa), so their low
+representation is not a short-query artifact.
+
+| File | Purpose |
+|---|---|
+| `scripts/step26a_unk_linclust30.sh` | Complete-ORF and length filter |
+| `scripts/step26b_get_nmpfams2.sh` | NMPFams2 download and md5 check |
+| `scripts/step26b2_resume_iso.sh` | Resume isolate-family download |
+| `scripts/step26b3_nmpfams2_search.sh` | Search against family representatives, 10,000-query sensitivity check |
+| `scripts/step26b3_summary.py` | Representation of proteins and families |
+| `scripts/step26d1_gu_eu_split.py` | Metagenome-family representation by genomic and environmental class |
+| `scripts/step26d3_iso_gu_eu_split.py` | Isolate-family representation by class |
+| `scripts/step26d4_union_gu_eu.py` | Union of metagenome and isolate representation |
+| `scripts/step26e2_posctrl.sh` | Positive control |
+| `scripts/step26e3_posctrl_by_length.py` | Positive control and query lengths by length bin |
+
+Output: `results/unk_filtered_aplakidou.faa`, `results/nmpfams2_summary.tsv`,
+`results/nmpfams2_{,iso_,union_}gu_eu.tsv`, `results/nmpfams2_posctrl_summary.tsv`,
+`results/nmpfams2_posctrl_by_length.tsv`
+
+### Step 22. Environmental-only 30% families and their recurrence
+
+All 2,441,674 complete members of at least 35 aa in the 95% clusters of the
+filtered representatives were clustered directly with MMseqs2 (`linclust
+--min-seq-id 0.3 -c 0.8 --cov-mode 0`, as for NMPFams2). Each family was labelled
+by the classes of its members' 95% representatives, and recurrence was counted
+over metagenomes, animals and cohorts.
+
+**Result.** The members form 412,858 families: 13,680 have at least 25 protein
+records and 236 have at least 100, but counted as exact-unique sequences only 29
+reach 25 and 1 reaches 100. 303,043 families are environmental-only, 109,260
+genomic-only and 555 mixed. Of the environmental-only families, 740 contain at
+least 3 distinct 95% representatives and 8 contain at least 10.
+
+**Recurrence.** 30,780 environmental-only families occur in at least 10
+metagenomes, but 7,338 of these reach 10 only through repeated sampling of WF22
+animals, so recurrence is counted in animals. 69,605 families occur in at least
+2 cohorts and 19,563 in all three. 23,442 occur in at least 10 animals, and 15,580
+in at least 10 animals and at least 2 cohorts; this set is carried into Steps 24
+and 25.
+
+| File | Purpose |
+|---|---|
+| `scripts/step26a2_raw_counts.py` | Family sizes through 95% representatives, superseded by step26e1 |
+| `scripts/step26d2_unique_counts.py`, `.sh` | Unique-sequence sizes through 95% representatives, superseded by step26e1 |
+| `scripts/step26e1_direct30.sh` | Direct 30% clustering of member proteins |
+| `scripts/step26f_direct30_gu_eu.py` | Genomic and environmental composition of families |
+| `scripts/step26f2_eu_recurrence.py` | Metagenomes, animals and cohorts per environmental-only family |
+
+Output: `results/unk_direct30_summary.tsv`, `results/unk_direct30_eu_families.tsv`,
+`results/unk_direct30_eu_recurrence.tsv`, log `step26f`
+
+### Step 23. *Basidiobolus* proteins in the catalog
+
+Proteins from five *Basidiobolus* genomes (STP1710, STP1717, UHM207, UHM260,
+UHM520) were searched against the catalog's 95% representatives with MMseqs2
+(`search -e 1e-5 --min-seq-id 0.9 -c 0.8 --cov-mode 1`, coverage of the catalog
+protein). The catalog protein in each best hit was called bacterial when its eggNOG
+lineage or its contig's taxonomy was Bacteria. Full-length candidates were checked
+for gene neighbours on their contig and for presence in control animals.
+
+**Result.** 42,456 *Basidiobolus* proteins hit 14,943 catalog representatives. In
+3,062 cases the best hit is a bacterial protein, but in 2,245 of these less than
+half of the fungal protein is covered (a domain inside a longer protein). Requiring
+80% coverage of both proteins leaves 338 queries and 61 catalog proteins. None of
+the 61 occurs in a retained control sample; 3 occur in the excluded control
+UHM586.41010, each also in 5 to 18 inoculated samples. 52 of the 61 are the only
+gene on their contig and 58 have no annotated neighbour, so their origin is
+unresolved. The one candidate with a bacterial neighbour lies on a 533 bp contig
+that aligns end to end (blastn, E <= 1e-5) to all six *Basidiobolus* genomes,
+including UHM516, which has no protein file and was not in the protein search
+(27 copies in STP1710 at up to 94.65% identity), so the contig and its
+"bacterial" neighbour are a multi-copy *Basidiobolus* repeat. There is no
+convincing recent bacterial donor at >= 90% identity. Presence is from assembled proteins at 89 metagenomes, before the
+WF24 exclusion.
+
+| File | Purpose |
+|---|---|
+| `scripts/step27a_basid_vs_catalog.sh` | *Basidiobolus* proteins against catalog representatives |
+| `scripts/step27b_label_hits.py` | Bacterial labels and best hits |
+| `scripts/step27c_contig_context.py` | Contig neighbours of full-length candidates |
+| `scripts/step27d1_candidate_presence.py` | Presence of candidates in control and inoculated samples |
+| `scripts/step27d2_contig_blastn.sh` | blastn of the bacterial-context contig against the genomes |
+
+Output: `results/basid_vs_catalog_labelled.tsv`, `results/basid_bacterial_candidates.tsv`,
+`results/basid_candidates_context.tsv`, `results/basid_candidates_presence.tsv`,
+`results/basid_contig_k141_15734_blastn.tsv`
+
+### Step 24. Structural search of recurrent environmental-only families
+
+Representatives of the 15,580 recurrent families (Step 22) were translated to 3Di
+structural sequence with ProstT5 and searched with Foldseek (`search -e 1e-1`)
+against PDB and CATH50. A hit is E <= 1e-3, set on a pilot of the 740 families with
+at least 3 distinct 95% representatives, 740 length-matched annotated proteins and
+the 740 pilot sequences reversed as decoys. ProstT5 databases carry no coordinates,
+so hits are E-value based, with no TM-score.
+
+**Calibration.** At E <= 1e-3 the pilot gives 7.57% hits in PDB and 7.84% in
+CATH50, the length-matched annotated proteins 62.43% and 60.68%, and the reversed
+decoys 0% in both.
+
+**Result.** 218 of the 15,580 families (1.40%) have a hit in either database
+(PDB 117, CATH50 196). The rate rises with length but stays below the pilot's in
+every bin:
+
+| length (aa) | recurrent set | pilot | annotated, length-matched | reversed |
+|---|---|---|---|---|
+| < 100 | 75/8,615 (0.87%) | 1/353 (0.28%) | 158/350 (45.14%) | 0/353 |
+| 100-199 | 89/5,744 (1.55%) | 18/230 (7.83%) | 189/233 (81.12%) | 0/230 |
+| 200-399 | 41/1,176 (3.49%) | 27/123 (21.95%) | 111/123 (90.24%) | 0/123 |
+| >= 400 | 13/45 (28.89%) | 23/34 (67.65%) | 33/34 (97.06%) | 0/34 |
+| all | 218/15,580 (1.40%) | 69/740 (9.32%) | 491/740 (66.35%) | 0/740 |
+
+118 pilot families are also in the recurrent set and give the same 3 hits (2.54%)
+in both runs, so the lower rate reflects family selection, not length or a
+technical difference. The >= 400 aa bins are small (45 and 34), and no decoys were
+run on the recurrent set.
+
+| File | Purpose |
+|---|---|
+| `scripts/step28a_install_foldseek.sh` | Foldseek GPU build and ProstT5 weights |
+| `scripts/step28a2_foldseek_epyc.sh` | ProstT5 weights download, rerun on epyc |
+| `scripts/step28b_foldseek_dbs.sh` | PDB and CATH50 databases |
+| `scripts/step28c_prostt5_gputest.sh` | ProstT5 GPU test |
+| `scripts/step28d_inputs.py` | Pilot query set |
+| `scripts/step28e_pilot_cpu.sh` | Pilot search, ProstT5 on CPU |
+| `scripts/step28e2_convert.sh` | Pilot hit tables |
+| `scripts/step28f_sets.py` | Length-matched annotated and reversed calibration sets |
+| `scripts/step28f_calib.sh` | Calibration searches |
+| `scripts/step28f_summary.py` | Calibration hit rates |
+| `scripts/step28g_inputs.py` | Recurrent query set |
+| `scripts/step28g_main.sh` | Recurrent-set search |
+| `scripts/step28g_summary.py` | Recurrent-set hit rates |
+| `scripts/step28g2_by_length.py` | Hit rates by length bin, pilot and recurrent overlap |
+
+Output: `results/prostt5_calib_summary.tsv`, `results/prostt5_main_summary.tsv`,
+`results/prostt5_by_length.tsv`
+
+### Step 25. Predicted structures of EU-only unknown families
 
 ESMFold models were built for family representatives in three groups drawn from
 the 15,580 EU-only unknown families: 218 with a structural hit
