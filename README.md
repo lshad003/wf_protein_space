@@ -375,6 +375,19 @@ unclassified, consistent with lineages lacking sequenced relatives.
 
 Output: `results/gene_taxonomy_n88.tsv`
 
+Correction (2026-10-16): the domain parse used here read only 'd_' lineage
+tokens and missed '-_' labels. With the corrected parse
+(scripts/step34c2c_taxv2.py, results/gene_taxonomy_n88_v2.tsv), EU genes on
+classified contigs are mostly eukaryotic. Of genes with contig taxonomy
+(results/step34c2c_summary.tsv), contigs are unclassified for 38.5% of K
+(previously 74.6%), 25.9% of KWP (74.6%), 23.6% of GU (74.4%) and 33.8% of EU
+genes (91.6%). EU genes are 53.8% eukaryotic (4.5%) and 12.3% bacterial
+(3.9%); K genes are 56.0% bacterial and 5.5% eukaryotic, KWP 57.0% and 16.9%,
+GU 67.5% and 8.1%. Among genes whose contig has a domain, EU is 81.2%
+eukaryotic (93,809 of 115,463), against 8.9% for K, 22.8% for KWP and 10.7%
+for GU. The statement above that genes with no database match sit on largely
+unclassified DNA does not hold under the corrected parse.
+
 ### Step 19. Gene neighbourhood of unknown families
 
 For the 8,464 unknown families with three or more members, annotated domains on
