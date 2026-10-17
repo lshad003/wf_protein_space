@@ -664,6 +664,586 @@ Output: `results/esmfold_input_labels.tsv`, `results/esmfold_pdb/`,
 `results/esmfold_peek_v2.tsv`, `results/step29_fold4_presence.tsv`,
 `results/step29d_fold4_neighbours.tsv`, log `step29b_esmfold.29932169`
 
+### Step 26. Local structural comparison of the folded no-hit models
+
+The 10 folded no-hit ESMFold models from Step 25 were searched with a local Foldseek
+(commit 463739e, run on CPU) against PDB and CATH50 with `--exhaustive-search 1
+-e 10`, which reports TM-scores. For the four compact models, TM-scores were also
+computed on Foldseek's own alignments from the saved web-server results (3Di/AA
+mode), which include AlphaFold DB, Swiss-Prot and MGnify databases.
+
+**Cse2/CasB-like (161 aa).** The best local hit in both databases is the CasB chain
+of an *E. coli* Cascade structure (PDB 5h9e chain C; CATH50 5h9eC00): probability
+1.000, qTM 0.618, tTM 0.654, query coverage 0.90, E 0.026 (PDB) and 0.020 (CATH50).
+On the web results it aligns to Swiss-Prot Cse2 Q53VY0 at qTM 0.637, to AlphaFold DB
+Cse2/CasB proteins at up to qTM 0.735, and to an uncharacterized MGnify protein at
+qTM 0.833.
+
+**The other three compact models.** None has a local hit with qTM >= 0.5 and
+probability >= 0.5 except the HTH-like model, whose best CATH50 match (domain
+1.20.58.110 from Q2FXY6) has qTM 0.531 at probability 0.569 and E 1.03. The
+DivIVA-like model's best local match is CATH50 2wujA00 (qTM 0.359); on the web
+results it aligns to AlphaFold DB DivIVA-domain proteins at qTM 0.798 but tTM
+0.086, and to Wag31 at qTM 0.681, tTM 0.368, so it matches a DivIVA region only.
+The helical repeat-like model's best match in either local database is 4jw3
+(qTM 0.319). These remain structural resemblances, not novel folds. Three of the
+six elongated models have matches with qTM >= 0.5 and probability >= 0.5, all at
+E > 1.
+
+| File | Purpose |
+|---|---|
+| `scripts/step29e_foldseek_local.sh` | Local Foldseek with TM-scores, PDB and CATH50 |
+| `scripts/step29f_foldseek_web_tm.py` | TM-scores from the saved web-server results |
+
+Output: `results/step29e_foldseek_summary.tsv`, `results/step29e_foldseek_{PDB,CATH50}.m8`,
+`results/step29f_foldseek_web_tm.tsv`, `results/foldseek_web4/`
+
+### Step 27. Gene neighbourhoods of the recurrent environmental-only families
+
+Neighbourhoods of the 15,580 recurrent environmental-only families (Step 22) were
+compared with 2,000 annotated families matched by the number of sequence variants.
+A variant is a distinct member 95% representative; each variant contributes its
+most common set of Pfam and eggNOG annotations within three genes. An annotation is
+conserved when it occurs in at least 2 variants and at least 50% of a family's
+variants, is at least 5 times more common than in the background of the same set,
+and occurs near members of at least 5 families. Annotated families are 50% clusters
+of Pfam-annotated proteins (seed 30). A first version that counted conservation per
+animal (step30a) was replaced by this variant-based count because one strain
+recurring across animals was counted as conservation.
+
+**Most recurrent families are a single sequence variant.** 14,918 of 15,580
+(95.75%) have one variant, so their recurrence is one sequence recovered in many
+animals. The baseline was drawn to the same variant distribution (1,915 of its
+2,000 families are single-variant).
+
+**Multi-variant families are no more context-conserved than annotated ones.** Of
+662 unknown families with at least 2 variants, 298 have an annotation conserved at
+50% (285 at 75%, 281 at 90%), against 37 of 85 baseline families (30 and 30). The
+share differs in both directions by variant bin:
+
+| variants | unknown, conserved at 50% | baseline, conserved at 50% |
+|---|---|---|
+| 2 | 251/544 (46.1%) | 28/70 (40.0%) |
+| 3 | 25/62 (40.3%) | 5/8 (62.5%) |
+| 4 | 8/20 (40.0%) | 1/3 (33.3%) |
+| 5-9 | 12/33 (36.4%) | 3/4 (75.0%) |
+| >= 10 | 2/3 | 0/0 |
+
+The baseline uses 50% clusters and the unknowns 30% families, so the comparison is
+approximate.
+
+**Eukaryotic neighbourhoods.** A family is flagged when Eukaryota is at least half
+of its neighbour representatives with a classified contig domain. With the
+corrected domain parse (Step 38), 12,322 of the 14,767 families with a classified
+neighbour are flagged (`results/step34c2c_summary.tsv`); the parse used in this
+step gave 3,030 of 4,631.
+
+**Single-variant context.** Among the 14,918 single-variant families, the most
+common neighbour set includes transcription or regulation annotations in 819,
+metabolism 799, transport or membrane 714, phage or mobile elements 344, DNA
+replication or repair 196, cell division or envelope 186, CRISPR-Cas or other
+defence systems 84 and secretion 38. These are neighbour annotations of one
+genome per family, not conserved calls. The Cse2/CasB-like family is one variant
+(37 members, 26 animals, genus *Microbacterium*), whose most common neighbour set
+holds CRISPR_Cse1 (1.00), Cas_CT1975 (1.00) and Cas_Cas5d (0.95): a canonical type
+I-E neighbourhood of one sequence variant, not conservation across variants. The
+15,580 families were later replaced by the strict_final families (Step 38),
+because many were of fly origin (Steps 34-35).
+
+| File | Purpose |
+|---|---|
+| `scripts/step30a_eu15580_neighbours.py`, `.sh` | Per-animal neighbourhood count, superseded |
+| `scripts/step30b_eu15580_neighbours.py`, `.sh` | Variant-based neighbourhood conservation, matched baseline |
+
+Output: `results/step30b_family_summary.tsv`, `results/step30b_baseline_comparison.tsv`,
+`results/step30b_single_variant_context.tsv`, `results/step30b_family_annotations.tsv`,
+`results/step30b_category_map.tsv`
+
+### Step 28. Structures of defence-context single-variant families
+
+The 84 single-variant families whose most common neighbour set holds a CRISPR-Cas,
+restriction-modification or toxin-antitoxin annotation (Step 27) were folded with
+ESMFold (11 models reused from Step 25, 73 new, same settings, terminal stop
+character removed) and searched with the local Foldseek of Step 26. A match needs
+qTM >= 0.5 and probability >= 0.5 in PDB or CATH50.
+
+**Result.** 4 models are folded, 1 helix-only and 79 low confidence (median 69.5
+aa, median pLDDT 49.45). Five families have a match, and only the Cse2/CasB-like
+control matches the system of its neighbours (PDB 5h9e chain C, qTM 0.618, pLDDT
+70.1, pTM 0.740). UHM581.41005__k141_82078_63, next to PemK_toxin, matches an
+accessory protein of a relaxosome structure (PDB 5vfy chain D, E 4.5e-7, qTM 0.703,
+tTM 0.824) on a low-confidence model (pLDDT 55.9, pTM 0.557).
+UHM22.35746__k141_11288_106 (folded, next to Abi_2) matches 1r7j (qTM 0.545,
+E 0.021); the two others match at E > 1. None of these four matches its neighbours.
+
+| File | Purpose |
+|---|---|
+| `scripts/step31a_def84_input.py` | Defence-context family selection |
+| `scripts/step31b_esmfold.sh` | ESMFold, CPU |
+| `scripts/step31c_def84_summary.py`, `.sh` | Foldseek, confidence classes and summary |
+
+Output: `results/step31_def84_summary.tsv`
+
+### Step 29. Contig classification with Tiara
+
+Contigs of at least 1 kb from all 88 assemblies were classified with Tiara 1.0.3
+(`-m 1000 --probabilities`). Prokaryotic means bacteria, archaea or prokarya;
+eukaryotic means eukarya or organelle. The excluded control UHM586.41010 was run
+separately and used only to label representatives whose own contig is in that
+assembly. Reads were not depleted of host DNA before assembly.
+
+**Result.** 3,795,590 contigs were classified: 3,147,020 prokaryotic (831,604 of
+them >= 3 kb), 630,389 eukaryotic (196,589 >= 3 kb) and 18,181 unknown.
+
+| File | Purpose |
+|---|---|
+| `scripts/step32a_tiara_array.sh` | Tiara on the 88 assemblies |
+| `scripts/step32a2_tiara_41010.sh` | Tiara on UHM586.41010 |
+
+Output: `results/tiara/<stem>.tiara.tsv`
+
+### Step 30. Tiara labels of protein classes and families
+
+Each supported representative takes the Tiara class of its own contig, in bands of
+>= 3 kb, 1-3 kb and < 1 kb (not classified).
+
+**Classes.** Within the >= 3 kb band, environmental-only unknowns (EU) are mostly on
+eukaryotic contigs, the other classes mostly on prokaryotic ones:
+
+| class | prokaryotic | eukaryotic | unknown | share on contigs < 1 kb |
+|---|---|---|---|---|
+| K | 95.36% | 4.54% | 0.10% | 11.83% |
+| KWP | 89.02% | 10.78% | 0.20% | 22.61% |
+| GU | 92.49% | 7.28% | 0.23% | 25.52% |
+| EU | 14.09% | 84.95% | 0.96% | 33.22% |
+
+In the 1-3 kb band EU is 19.75% prokaryotic and 78.90% eukaryotic.
+
+**Families.** Of the 15,580 recurrent families (233,120 members), 12,542 (80.50%)
+have most members on eukaryotic contigs >= 3 kb and 2,895 (18.58%) on prokaryotic
+ones. The Cse2/CasB-like family has all 37 members on prokaryotic contigs.
+
+**NMPFams2.** EU representatives on prokaryotic contigs are also mostly outside
+NMPFams2: 23,781 of 24,415 (97.40%) unmatched at >= 3 kb and 8,341 of 8,532
+(97.76%) at 1-3 kb, against 201,646 of 202,198 (99.73%) on eukaryotic contigs and
+265,061 of 266,848 (99.33%) overall. The eukaryotic source is identified in Steps
+31-35: mostly the feeder fly, *Drosophila*, with little frog DNA.
+
+| File | Purpose |
+|---|---|
+| `scripts/step32b_tiara_map.py`, `.sh` | Tiara class per representative, family and NMPFams2 group |
+
+Output: `results/step32b_class_tiara.tsv`, `results/step32b_family_tiara.tsv`,
+`results/step32b_nmpfams2_tiara.tsv`
+
+### Step 31. Wood frog DNA in the assemblies
+
+Contigs were mapped to the wood frog genome (*Lithobates sylvaticus*,
+GCA_028564925.1, chromosome level; `catalog/host/SOURCE.txt`) with minimap2 2.30
+(`-x asm10 --secondary=no -c`). A contig is host when its merged aligned length
+covers at least 50% of it at at least 95% identity (matches over alignment block
+length from the CIGAR alignment); 90% is the sensitivity threshold. Four contig sets
+were tested: A, Tiara-eukaryotic contigs >= 1 kb; B, contigs carrying an EU
+supported representative; F, contigs carrying a member of the 15,580 recurrent
+families; C, a 2% random sample of Tiara-prokaryotic contigs >= 3 kb (seed 33) as
+a negative control.
+
+**Positive control.** 5,000 fragments simulated from the frog genome (1%
+substitutions, lengths drawn from set A, seed 33) are called host in 4,984 cases
+(99.68%) at >= 95% and 4,990 (99.80%) at >= 90%; median identity 0.9902.
+
+**Result.** Frog DNA is a minor component:
+
+| set | contigs | host at >= 95% | host at >= 90% |
+|---|---|---|---|
+| A, Tiara-eukaryotic >= 1 kb | 630,389 | 3,235 (0.51%) | 3,474 (0.55%) |
+| B, contigs with an EU representative | 323,147 | 1,327 (0.41%) | 1,405 (0.43%) |
+| F, contigs with a recurrent-family member | 134,321 | 194 (0.14%) | 213 (0.16%) |
+| C, negative control | 16,632 | 8 (0.05%) | 16 (0.10%) |
+
+Of the 430,299 EU representatives, 1,341 (0.31%) are on host contigs, most of them
+on contigs < 1 kb (1,084 of 142,930, 0.76%; at most 0.02% on contigs >= 3 kb).
+14 of the 15,580 families have at least half of their members on host contigs; the
+Cse2/CasB-like family has none. A first mapping run without `-c` (step33c v1)
+reported only seed-chain matches as identity (median 0.777 on simulated frog
+fragments) and was replaced by this run; its files are marked superseded.
+
+| File | Purpose |
+|---|---|
+| `scripts/step33b_host_index.sh` | minimap2 index of the frog genome |
+| `scripts/step33c_prep.py`, `.sh` | Contig sets A, B, C and F |
+| `scripts/step33c_map_array.sh`, `scripts/step33c_summary.py`, `.sh` | First mapping run, superseded |
+| `scripts/step33c2_map_array.sh` | Mapping with `-c` |
+| `scripts/step33c2_summary.py`, `.sh` | Host calls per contig, EU representative and family |
+| `scripts/step33d_sim.py`, `scripts/step33d_poscontrol.sh`, `scripts/step33d_summary.py` | Simulated positive control, first run |
+| `scripts/step33d2_poscontrol.sh`, `scripts/step33d2_summary.py` | Positive control with `-c` |
+
+Output: `results/step33c_contig_host_v2.tsv`, `results/step33c_eu_host_v2.tsv`,
+`results/step33c_family_host_v2.tsv`, `results/step33d_sim_v2/`
+
+### Step 32. Tiara against read and contig taxonomy
+
+The Tiara-eukaryotic fraction of contigs >= 3 kb per sample was compared with
+Kraken2 (PlusPFP) read classifications, and Tiara classes with the UniRef50 LCA
+domain of the same contigs. Cohort is confounded with sequencing run, so this is
+descriptive.
+
+**Per sample.** The Tiara-eukaryotic fraction of contigs >= 3 kb has a median of
+0.95% (0.13% to 62.9%); 27 samples are at 10% or more, and 10 samples hold 60.7% of
+all Tiara-eukaryotic contigs >= 3 kb (196,589 of 1,031,343 pooled, 19.06%).
+Spearman rho with the Kraken2 Eukaryota read percentage is 0.53 over 88 samples
+(WF22 0.44, WF23 0.60, WF24 0.81). In PlusPFP the only chordate with reads is
+*Homo sapiens*, so frog DNA is not visible to Kraken2. WF22 holds repeated samples
+of 15 animals, so rho is given without a p-value.
+
+**Contig domain.** With the corrected domain parse (Step 38), Tiara and the LCA
+domain agree on 113,168 of 114,528 contigs >= 3 kb with both a Tiara call and a
+domain (98.81%); 34,755 of 36,386 Eukaryota-labelled contigs (95.52%) are
+Tiara-eukaryotic.
+
+| File | Purpose |
+|---|---|
+| `scripts/step33e_tiara_vs_kraken.py`, `.sh` | Per-sample comparison and Tiara against LCA domain |
+
+Output: `results/step33e_tiara_vs_kraken.tsv`, `results/step33e_tiara_vs_lca.tsv`;
+corrected-parse values in `results/step34c2c_summary.tsv`
+
+### Step 33. 18S rRNA genes on Tiara-eukaryotic contigs
+
+18S rRNA genes were predicted with barrnap 0.9 (`--kingdom euk`) on
+Tiara-eukaryotic contigs >= 1 kb, and hits >= 500 bp were assigned to their top
+SILVA 138.1 NR99 match with vsearch 2.21.1 (`--id 0.70`). The counts are numbers of
+18S-bearing contigs, not abundances.
+
+**Result.** 729 18S genes were classified, at least one in each of the 88 samples.
+Insecta account for 96 (in 86 samples), 92 of them *Drosophila melanogaster*
+(median identity 99.6%). Fungi account for 272 (86 samples), mostly yeasts
+(*Pichia occidentalis* 75, *Graphium penicillioides* 66, *[Candida]
+stellimalicola* 27, *Galactomyces candidus* 18); *Basidiobolus* gives 37 in 34
+samples (32 *B. ranarum*). Mites typical of fly cultures (*Sancassania* 18,
+*Hormosianoetus* 12) and plants or algae (94) are also present. Amphibia give 10
+contigs in 9 samples (all *Rana catesbeiana* top hits, 99.9%), and no Ciliophora
+or Opalinata 18S was found. 39 top hits to *Solanum chacoense* are at 87.1% to
+90.6% identity and are not potato.
+
+| File | Purpose |
+|---|---|
+| `scripts/step33f_barrnap_array.sh` | barrnap on Tiara-eukaryotic contigs |
+| `scripts/step33f_collect.py` | 18S genes >= 500 bp |
+| `scripts/step33f_classify.sh` | vsearch against SILVA 138.1 |
+| `scripts/step33f_summary.py` | Composition by group and cohort |
+
+Output: `results/step33f_18S_classified.tsv`, `results/step33f_composition.tsv`
+
+### Step 34. *Drosophila* DNA in the assemblies
+
+The four contig sets of Step 31 were mapped to *D. melanogaster* dm6
+(GCF_000001215.4; `catalog/fly/SOURCE.txt`) with the same settings and rule. WF22
+froglets were fed wingless fruit flies (*Drosophila* sp.), according to the draft
+Methods of the experiment (Froglet Husbandry); feeding in WF23 and WF24 is not
+recorded in the project files.
+
+**Positive control.** 5,000 simulated fly fragments are called fly in all 5,000
+cases at >= 95%; median identity 0.9902.
+
+**Result.** Fly DNA is the largest identified eukaryotic component:
+
+| set | contigs | fly at >= 95% | fly at >= 90% |
+|---|---|---|---|
+| A, Tiara-eukaryotic >= 1 kb | 630,389 | 269,721 (42.79%) | 277,510 (44.02%) |
+| B, contigs with an EU representative | 323,147 | 102,598 (31.75%) | 106,215 (32.87%) |
+| F, contigs with a recurrent-family member | 134,321 | 79,966 (59.53%) | 82,115 (61.13%) |
+| C, Tiara-prokaryotic sample | 16,632 | 70 (0.42%) | 70 (0.42%) |
+
+141,359 of the 430,299 EU representatives (32.85%) are on fly contigs, and 11,962
+of the 15,580 recurrent families (76.78%) have at least half of their members on
+fly contigs (12,232, 78.51%, at >= 90%). Fly and frog calls overlap on 1 contig.
+The Cse2/CasB-like family has no fly member.
+
+| File | Purpose |
+|---|---|
+| `scripts/step33g_sim.py`, `scripts/step33g_control.sh`, `scripts/step33g_sim_summary.py` | Simulated positive control |
+| `scripts/step33g_map_array.sh` | Mapping to dm6 |
+| `scripts/step33g_summary.py`, `.sh` | Fly calls per contig and family |
+
+Output: `results/step33g_contig_fly.tsv`, `results/step33g_family_fly.tsv`,
+`results/step33g_sim/`
+
+### Step 35. Placement of fly-derived EU representatives on fly genes
+
+Each EU representative on a fly contig was projected through the contig's
+alignment onto dm6 and classed by the RefSeq annotation it overlaps (at least
+30 bp, first match wins), then searched against the dm6 proteome with DIAMOND
+blastp `--sensitive` (E <= 1e-3).
+
+**Result.** Most fly-derived EU representatives are open reading frames outside
+fly coding sequence in that frame:
+
+| placement | EU representatives on fly contigs | with a dm6 protein hit |
+|---|---|---|
+| CDS, same strand, in frame | 6,697 (4.74%) | 95.46% (median identity 98.6%) |
+| CDS, same strand, other frame | 2,936 (2.08%) | 5.76% |
+| CDS, opposite strand | 14,437 (10.21%) | 0.57% |
+| UTR or non-coding exon | 14,659 (10.37%) | 0.40% |
+| intron | 57,882 (40.95%) | 0.06% |
+| intergenic | 43,586 (30.83%) | 0.18% |
+| not projected | 1,162 (0.82%) | 2.32% |
+| all | 141,359 | 4.84% |
+
+For the representatives of the fly-majority families (10,878 on a fly contig),
+11.85% are in frame with fly CDS and 38.21% in introns. At least half
+soft-masked: 5.98% of all and 1.99% of the family representatives.
+
+| File | Purpose |
+|---|---|
+| `scripts/step33h_classify.py` | Projection onto dm6 and annotation class |
+| `scripts/step33h_summary.py` | DIAMOND, repeat and class summary |
+| `scripts/step33h.sh` | Job script |
+
+Output: `results/step33h_rep_class.tsv`, `results/step33h_diamond_dm6.tsv`,
+`results/step33h_summary.tsv`
+
+### Step 36. Origin label for every supported representative
+
+Each of the 2,067,011 supported representatives was labelled from its own contig,
+first match in this order: fly, frog (Steps 31 and 34; contigs not mapped before
+were mapped with the same settings), Tiara-eukaryotic other, Tiara-prokaryotic,
+Tiara-unknown, or < 1 kb unclassified. The strict set is Tiara-prokaryotic contigs
+>= 1 kb that are not fly or frog; the broad set adds Tiara-unknown and < 1 kb
+contigs and is used only as a sensitivity comparison.
+
+**Result.** EU representatives are mostly of eukaryotic or unclassified origin:
+
+| origin | K | EU | all |
+|---|---|---|---|
+| fly | 20,117 (1.50%) | 141,359 (32.85%) | 175,931 (8.51%) |
+| frog | 1,117 (0.08%) | 1,340 (0.31%) | 3,295 (0.16%) |
+| Tiara-eukaryotic other | 45,358 (3.38%) | 146,214 (33.98%) | 203,489 (9.84%) |
+| Tiara-prokaryotic (strict) | 1,120,953 (83.47%) | 41,392 (9.62%) | 1,362,125 (65.90%) |
+| Tiara-unknown | 1,415 (0.11%) | 1,735 (0.40%) | 3,674 (0.18%) |
+| < 1 kb unclassified | 154,060 (11.47%) | 98,259 (22.84%) | 318,497 (15.41%) |
+
+On contigs < 1 kb, 30.50% of EU representatives are on fly contigs. The strict set
+holds 1,362,125 representatives (EU 41,392, 3.04%), the broad set 1,684,296 (EU
+141,386). The strict set was refined further in Step 38.
+
+| File | Purpose |
+|---|---|
+| `scripts/step34a_prep.py` | Representative contigs not mapped before |
+| `scripts/step34a_map_array.sh` | Frog and fly mapping of those contigs |
+| `scripts/step34a_origin.py`, `.sh` | Origin label per representative |
+
+Output: `results/step34a_rep_origin.tsv`, `results/step34a_origin_by_class.tsv`
+
+### Step 37. Catalog statistics of the final microbial set
+
+Statistics were recomputed for the final set (strict_final, Step 38), with the
+earlier sets beside them. Read shares are percentages of all reads on the
+2,067,011 supported representatives, raw and normalised by CDS length; a gene is
+present in a sample at >= 1 read, and at >= 5 reads as a stricter criterion.
+
+**Result.** strict_final holds 1,359,273 representatives and 92.99% of mapped
+reads (83.94% length-normalised):
+
+| class | representatives | mean CDS (bp) | complete ORF | mean samples present (>= 1 / >= 5 reads) | in all three cohorts (>= 1 / >= 5 reads) | reads (raw / length-normalised) |
+|---|---|---|---|---|---|---|
+| K | 1,118,691 (82.30%) | 1,121 | 88.09% | 52.61 / 33.67 | 95.19% / 64.71% | 85.73% / 70.83% |
+| KWP | 94,261 (6.93%) | 901 | 85.89% | 45.79 / 27.73 | 91.20% / 53.71% | 3.84% / 4.36% |
+| GU | 105,207 (7.74%) | 523 | 91.40% | 37.95 / 22.64 | 80.81% / 39.39% | 2.64% / 5.83% |
+| EU | 41,114 (3.02%) | 372 | 78.12% | 37.05 / 22.72 | 72.13% / 35.17% | 0.79% / 2.92% |
+
+In the whole catalog EU was 430,299 representatives (20.82%) with 3.56% of reads
+(11.07% length-normalised); in the broad set 141,386 (8.39%) with 1.87%. Presence in
+all three cohorts falls sharply from >= 1 to >= 5 reads in every class, so it
+depends on sequencing depth. Per sample, reads on fly-derived representatives are a
+median 0.47% of mapped reads (0.06% to 9.09%; WF22 0.52%, WF23 0.53%, WF24 0.45%);
+cohort is confounded with sequencing run.
+
+| File | Purpose |
+|---|---|
+| `scripts/step34b_catalog_stats.py`, `.sh` | Strict, broad and whole-catalog statistics; fly read share |
+| `scripts/step34b2_final_stats.py`, `.sh` | strict_final statistics; NMPFams2 query filter |
+
+Output: `results/step34b2_catalog_stats_final.tsv`, `results/step34b_catalog_stats.tsv`,
+`results/step34b_fly_read_share.tsv`
+
+### Step 38. Environmental-only families of the final microbial set
+
+The strict EU representatives (41,392) were clustered at 30% identity with
+`mmseqs linclust --min-seq-id 0.3 -c 0.8 --cov-mode 0` (as in Step 22, but on the
+representatives, terminal stop removed). A family is recurrent when its members
+come from at least 10 animals and at least 2 cohorts. Three refinements followed.
+
+**Genus check.** Majority genus of each family's member contigs from the UniRef50
+LCA (48 of 88 samples have contig taxonomy): 2,090 of the 4,561 strict recurrent
+families carry a genus label. Fly-associated bacterial genera are the majority
+genus of 14 (0.67%; Providencia 13, Leuconostoc 1), against 0.48% of non-recurrent
+families and 0.39% of 5,000 random strict K representatives. The commonest are
+*Sphingobacterium* 184, *Microbacterium* 165, *Enterococcus* 84, *Flavobacterium*
+77 and *Corynebacterium* 75. 22 families had *Drosophila* as majority genus; their
+23 representative contigs failed the fly rule on identity (19), coverage (3) or
+lacked an alignment (1), and Tiara had called all of them prokaryotic.
+
+**Domain parse.** The contig domain had been read only from `d_` lineage tokens,
+which missed the `-_` form used in most samples with contig taxonomy; the
+corrected parse reproduces the old file row for row and moves 376,459 genes out of
+"unclassified" (see the note at Step 18).
+
+**strict_v2 and strict_final.** strict_v2 removes representatives on contigs that
+are fly at >= 90% identity (same coverage rule) or carry a Eukaryota LCA lineage:
+88, 2,616 and 143 by fly only, lineage only and both (EU 57, 150 and 66).
+strict_final then excludes the 5 single-representative recurrent families still
+dominated by *Drosophila* (each failed the fly mapping rule). strict_final holds
+1,359,273 representatives: K 1,118,691, KWP 94,261, GU 105,207 and EU 41,114.
+
+**Result on strict_final.** 39,926 families, 38,916 (97.47%) with one
+representative. 4,509 are recurrent (5,107 representatives), and 4,041 of them
+(89.62%) are a single sequence variant. Of the strict_final EU representatives,
+30,070 are complete ORFs of >= 35 aa and were searched against NMPFams2 (Step 21;
+8,996 partial, 2,710 shorter, 662 both); 29,267 of them (97.33%) are unmatched,
+and 3,868 of 4,127 (93.72%) among recurrent-family representatives. The
+Cse2/CasB-like representative (UHM45.35758__k141_100597_236) stays in a recurrent
+family of one variant: 45 member proteins from 32 animals in all three cohorts.
+These families replace the 15,580 recurrent families of Step 22, which were built
+before eukaryotic and diet-derived contigs were removed.
+
+| File | Purpose |
+|---|---|
+| `scripts/step34c_prep.py`, `scripts/step34c_strict_eu.sh` | Strict EU sequences, 30% clustering |
+| `scripts/step34c_families.py` | Recurrence, NMPFams2, Cse2 control |
+| `scripts/step34c2_genus.py`, `.sh` | Majority genus of families and baselines |
+| `scripts/step34c2b_drosophila.py`, `.sh` | Drosophila-majority families, contig details |
+| `scripts/step34c2c_taxv2.py` | Corrected domain parse and the summaries that use it |
+| `scripts/step34c2c_strict_v2.py`, `scripts/step34c2c.sh` | strict_v2 and family statistics |
+| `scripts/step34c2c_exclude.py`, `.sh` | Exclusion of 5 families; strict_final |
+
+Output: `results/step34c_strict_eu_families.tsv`, `results/step34c_strict_eu_nmpfams2.tsv`,
+`results/step34c2_recurrent_genus.tsv`, `results/step34c2b_drosophila_families.tsv`,
+`results/gene_taxonomy_n88_v2.tsv`, `results/step34c2c_summary.tsv`,
+`results/step34c2c_strict_v2_families.tsv`, `results/step34c2c_excluded_families.tsv`,
+`results/step34a_rep_origin_v2_final.tsv`, `results/step34b2_nmpfams2_filter.tsv`
+
+### Step 39. Egg-mass recurrence of environmental-only genes
+
+Presence of each strict_final EU representative was scored per animal (any member
+protein assembled from the animal's samples; >= 5 reads as a sensitivity), with
+41,114 random strict_final K representatives as a baseline (seed 343). WF22 uses
+months 2 and 3, the months all 15 animals share (74 of 88 samples retained). A
+representative is egg-mass restricted when it is present in at least half and at
+least 3 of an egg mass's animals and absent from all animals of the other egg
+masses that year. The null permutes egg-mass labels among animals within the year
+(1,000 permutations, group sizes kept). WF23 has one egg mass; in WF24 egg mass
+equals tank and egg mass 2 has 3 animals.
+
+**Result.** In WF22, 948 EU representatives are egg-mass restricted against a null
+mean of 67.5 (p = 0.001), and 616 K representatives against 77.6 (p = 0.001). With
+the same permutations applied to both sets, EU exceeds K by 332 (null mean -7.1,
+sd 45.4, p = 0.001); at >= 5 reads the difference is 454 (p = 0.001). Most come
+from egg mass 3 (EU 837, K 576). WF24 egg mass 4 is not above null (EU p = 0.10).
+
+| WF22 egg mass | animals | EU restricted (null) | K restricted (null) |
+|---|---|---|---|
+| 1 | 3 | 48 (4.9) | 29 (4.2) |
+| 2 | 3 | 63 (5.8) | 11 (3.9) |
+| 3 | 9 | 837 (56.8) | 576 (69.6) |
+
+**Egg mass, not inoculation.** STP1710.7 occurs only in egg mass 3. On average,
+each STP1710.7 animal carries 68.9% of the egg-mass-3-restricted EU representatives
+(control 74.6%, STP1717.1 84.8%), and none of them is confined to one treatment
+group. Egg masses were reared in separate tanks
+(Dallas et al. manuscript draft, 22UHMwf_draft_V1,
+Methods: Tadpole Husbandry), so egg mass means clutch plus rearing tank.
+
+| File | Purpose |
+|---|---|
+| `scripts/step34c3_eggmass.py`, `.sh` | Egg-mass recurrence and permutation null |
+| `scripts/step34c3b_checks.py`, `.sh` | Paired EU against K test; treatment check within egg mass 3 |
+
+Output: `results/step34c3_eggmass_recurrence.tsv`, `results/step34c3b_checks.tsv`
+
+### Step 40. Structural search of the final recurrent families
+
+One representative per strict_final recurrent family (4,509, median 80 aa) was
+searched as in Step 24, with the terminal stop removed: ProstT5 3Di, Foldseek
+`search -e 1e-1` against PDB and CATH50, hit at best E <= 1e-3. Controls are 4,509
+length-matched strict_final K representatives (10-aa bins, seed 34; where a bin had
+too few K representatives, the rest came from the next bin up) and the 4,509
+queries reversed.
+
+**Result.** 186 of 4,509 families (4.13%) have a hit, against 50.21% of the
+length-matched K representatives and 0.33% of the reversed decoys, so about 15 of
+the 186 are expected to be false:
+
+| length (aa) | recurrent families | K, length-matched | reversed |
+|---|---|---|---|
+| < 100 | 9/2,722 (0.33%) | 791/2,722 (29.06%) | 0/2,722 |
+| 100-199 | 41/1,154 (3.55%) | 878/1,154 (76.08%) | 5/1,154 (0.43%) |
+| 200-399 | 91/509 (17.88%) | 474/509 (93.12%) | 2/509 (0.39%) |
+| >= 400 | 45/124 (36.29%) | 121/124 (97.58%) | 8/124 (6.45%) |
+| all | 186/4,509 (4.13%) | 2,264/4,509 (50.21%) | 15/4,509 (0.33%) |
+
+56 of the families with a hit in Step 24 have the same sequence among these
+queries, and all 56 hit again. The Cse2/CasB-like representative reaches E 0.041
+(CATH50 4h7aB00), short of the threshold; its CasB match was found by ESMFold and
+Foldseek with TM-scores (Steps 25 and 26).
+
+| File | Purpose |
+|---|---|
+| `scripts/step34d_inputs.py` | Query, length-matched K and reversed sets |
+| `scripts/step34d_prostt5.sh` | ProstT5 and Foldseek, CPU |
+| `scripts/step34d_summary.py` | Hit rates by length, decoy rate, overlap with Step 24 |
+| `scripts/step34d2_kfix_inputs.py`, `step34d2_kfix_merge.py`, `step34d2_kfix.sh` | Replacement of 225 duplicated K controls |
+
+Output: `results/step34d2_by_length_fixed.tsv`, `results/step34d_query_hits.tsv`,
+`results/step34d_query_map.tsv`
+
+### Step 41. Treatment, egg mass and month on the final set
+
+The per-gene (Step 16) and community-level (Step 20) tests were rerun unchanged on
+strict_final genes and on strict_final EU genes alone, with TMM normalisation
+computed within each gene set. Added: a WF23 community test (126 distinct
+labelings), month within animal for presence, presence dispersion, and WF24 with
+35 animals as a sensitivity (primary 34, as before). Egg mass and treatment are
+constant within WF22 animals and are untestable by within-animal permutation.
+
+**Community.** All strict_final genes (EU genes in brackets):
+
+| term | test | R2 | p |
+|---|---|---|---|
+| egg mass, abundance | whole-animal permutation, 42 samples | 0.342 (0.321) | 0.001 (0.001) |
+| egg mass, abundance | animal centroids, 15 | 0.516 (0.491) | 0.001 (0.001) |
+| month, abundance | within animal, 44 samples | 0.118 (0.107) | 0.001 (0.001) |
+| treatment, abundance | whole-animal permutation | 0.052 (0.054) | 0.926 (0.877) |
+| treatment, abundance | animal centroids | 0.069 (0.075) | 0.665 (0.591) |
+| egg mass, presence | whole-animal permutation | 0.187 (0.235) | 0.001 (0.001) |
+| egg mass, presence | animal centroids | 0.371 (0.443) | 0.001 (0.001) |
+| month, presence | within animal | 0.102 (0.083) | 0.001 (0.001) |
+| treatment, presence | whole-animal permutation | 0.071 (0.071) | 0.617 (0.644) |
+| WF23 treatment, abundance | free permutation, 9 | 0.147 (0.154) | 0.245 (0.211) |
+| WF24 treatment, abundance | free permutation, 34 | 0.175 (0.182) | 0.614 (0.494) |
+
+Treatment groups differ in dispersion (p = 0.005; EU 0.004) but not in centroid.
+
+**Per gene.** limma-voom blocked on animal (within-animal correlation 0.3374; EU
+0.3059), genes at adjusted p < 0.05 among 294,643 tested (EU 5,604): treatment
+STP1710.7 2 (0) and STP1717.1 0 (10); egg mass 2 and 3 48,380 and 46,098 (761
+and 822); month 2 and 3 90,352 and 111,320 (1,564 and 1,660). STP1710.7 within egg
+mass 3 gives 0 (1). WF23 gives 0, and WF24 0 for all six strains with 34 or 35
+animals. Without blocking, treatment gives 4,281 and 7,884 genes. Egg mass and
+month structure gene abundance and presence; treatment does not, and the whole-
+catalog results of Steps 16 and 20 hold on the final set.
+
+| File | Purpose |
+|---|---|
+| `scripts/step34e_counts.py` | Count matrices of the two gene sets |
+| `scripts/step34e_hostfactor.R` | Community and per-gene tests for one gene set |
+| `scripts/step34e_summary.py` | New values beside the whole-catalog values |
+| `scripts/step34e_hostfactor.sh` | Job script |
+
+Output: `results/step34e_summary.tsv`, `results/step34e_strict_final_permanova.tsv`,
+`results/step34e_strict_final_limma.tsv`, `results/step34e_strict_final_EU_permanova.tsv`,
+`results/step34e_strict_final_EU_limma.tsv`, `results/step34e_limma/`
+
 ## Software
 
 Prodigal V2.6.3, MMseqs2 13-45111, eggNOG-mapper 2.1.9 (eggNOG 5.0.2),
