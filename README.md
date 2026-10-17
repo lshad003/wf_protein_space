@@ -601,6 +601,17 @@ run on the recurrent set.
 Output: `results/prostt5_calib_summary.tsv`, `results/prostt5_main_summary.tsv`,
 `results/prostt5_by_length.tsv`
 
+Correction (2026-10-16): the ProstT5 inputs in this step kept the terminal stop
+character. Rerun without it (scripts/step28h_inputs.py, step28h_nostar.sh,
+step28h_compare.py): 214 of the 15,580 families (1.37%) have a hit instead of 218
+(1.40%), with 200 kept, 18 lost and 14 gained (results/prostt5_main_hit_nostar.tsv);
+by length, < 100 aa 73/8,615 (0.85%), 100-199 85/5,744 (1.48%), 200-399 44/1,176
+(3.74%) and >= 400 12/45 (26.67%) (results/prostt5_by_length_nostar.tsv). The
+length-matched annotated proteins give 495/740 (66.89%) instead of 491 (66.35%),
+the reversed decoys 1/740 instead of 0/740, and the pilot 68/740 (9.19%) instead of
+69 (9.32%) (results/prostt5_thresholds_nostar.tsv). The conclusions stand; this
+family set was later replaced, and the final structural screen is Step 40.
+
 ### Step 25. Predicted structures of environmental-only unknown families
 
 ESMFold models were built for family representatives in three groups drawn from
@@ -663,6 +674,10 @@ HTH_26 (73 of 73) and Uma2 (72 of 73).
 Output: `results/esmfold_input_labels.tsv`, `results/esmfold_pdb/`,
 `results/esmfold_peek_v2.tsv`, `results/step29_fold4_presence.tsv`,
 `results/step29d_fold4_neighbours.tsv`, log `step29b_esmfold.29932169`
+
+Correction (2026-10-16): the HIT group in this step came from the pre-fix list of
+218 hits; 200 of them remain hits after the stop-character rerun (Step 24 note).
+The ESMFold inputs themselves had the stop removed.
 
 ### Step 26. Local structural comparison of the folded no-hit models
 
