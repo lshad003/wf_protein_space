@@ -1,7 +1,8 @@
 # Step 34d2 inputs: fix the Step 34d K control. results/step34d_known_lenmatched.faa has 4,509 records but 225 IDs
 # twice (40-49 aa; the 40-49 aa bin was drawn without excluding the 246 reps borrowed for 30-39 aa). The second copy of
-# each duplicate is replaced by a fresh strict_final K rep of 40-49 aa (seed 3442), drawn excluding every rep already
-# in the K set. Sequences from catalog/db/LsPS_AA_95_rep.fasta, terminal "*" stripped.
+# each duplicate is replaced by a fresh strict_final K rep (seed 3442), drawn excluding every rep already in the K set:
+# all available 40-49 aa reps first (27), the rest from the nearest upper 10-aa bins (50-59 aa, then up), the
+# nearest-bin rule of step34d_inputs.py (option 1, agreed 2026-10-16). Sequences from catalog/db/LsPS_AA_95_rep.fasta, terminal "*" stripped.
 # Outputs (refuse to overwrite; old files kept): results/step34d2_k_replacements.faa (225),
 #   results/step34d_known_lenmatched_fixed.faa (4,509 distinct, same order, replacements in place of second copies).
 import os, random, collections
@@ -32,9 +33,13 @@ with open(W + "/catalog/db/LsPS_AA_95_rep.fasta") as fh:
         elif hd in K: buf.append(l.strip())
     if hd in K: seq[hd] = "".join(buf).rstrip("*")
 used = set(c)
-pool = sorted(k for k, s in seq.items() if 40 <= len(s) <= 49 and k not in used)
-print("strict_final K reps 40-49 aa not in the K set: %d" % len(pool))
-rng = random.Random(3442); new = rng.sample(pool, 225)
+rng = random.Random(3442); new = []; lo = 40
+while len(new) < 225:
+    pool = sorted(k for k, s in seq.items() if lo <= len(s) <= lo + 9 and k not in used)
+    t = rng.sample(pool, min(225 - len(new), len(pool))); new += t; used |= set(t)
+    print("strict_final K reps %d-%d aa not in the K set: %d | drawn %d" % (lo, lo + 9, len(pool), len(t)))
+    lo += 10
+    if lo >= 100: raise SystemExit("ABORT: replacements would leave the <100 aa bin")
 if any("*" in seq[k] for k in new): raise SystemExit("ABORT: internal stop")
 it = iter(new); seen = set(); out = []
 for k, s in rec:
