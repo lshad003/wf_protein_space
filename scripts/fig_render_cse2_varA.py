@@ -1,4 +1,4 @@
-# Render for Figure 4c: ESMFold model of the Cse2/CasB-like protein (UHM636.41030__k141_332084_5) superposed on
+# Render for Figure 4c: ESMFold model of the Cse2/CasB-like protein (UHM45.35758__k141_100597_236) superposed on
 # E. coli CasB (PDB 5H9E chain C) by CE alignment; cartoon, ray-traced, transparent background.
 # Run on a compute node: pymol -cq fig_render_cse2.py. Output: results/fig_render_cse2_varA.png
 from pymol import cmd
