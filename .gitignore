@@ -33,3 +33,5 @@ scripts/locate_basid_mapping.py
 scripts/locate_basid_readtable.py
 scripts/fix_dup_bank_20261007.py
 scripts/__pycache__/
+!figures/
+!figures/*.pdf
