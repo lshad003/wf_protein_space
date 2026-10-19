@@ -26,7 +26,11 @@ echo "models >= 200 aa listed $(wc -l < $D/merizo/ids_ge200.txt), copied $(ls $D
 cd $D/merizo
 /bigdata/stajichlab/lshad003/condaenvs/merizo/bin/python /bigdata/stajichlab/lshad003/software/Merizo/predict.py \
   -d cpu -t $SLURM_CPUS_PER_TASK --length_conditional_iterate --output_headers -i $D/merizo/in/*.pdb > $D/merizo/merizo_results.tsv
-echo "merizo exit $?; rows $(grep -vc '^filename' $D/merizo/merizo_results.tsv)"
+rc=$?
+echo "merizo exit $rc; rows $(grep -vc '^input' $D/merizo/merizo_results.tsv)"
+if [ $rc -ne 0 ]; then echo "ABORT: merizo exit $rc"; exit 1; fi
+# 2026-10-19: the writer below fails with KeyError 'filename' (Merizo names the column 'input' and repeats the header
+# per model); job 30050461 hit this and the domains were written by scripts/step34j_b3a2_domains.py instead.
 /bigdata/stajichlab/lshad003/condaenvs/rf_py39/bin/python3 - <<'PYEOF'
 import os
 D = "/bigdata/stajichlab/lshad003/wf_protein_space/results/step34j/"
@@ -51,4 +55,7 @@ for r in rows:
         nd += 1
 print("models with domains %d of %d, domain PDBs written %d" % (nm, len(rows), nd))
 PYEOF
-date
+rc=$?
+echo "domain writer exit $rc"; date
+# 2026-10-19: exit with the main command's status so afterok dependencies see failures (CLAUDE.md rule)
+exit $rc

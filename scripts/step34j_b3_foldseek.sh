@@ -50,8 +50,13 @@ rc=$?
 if [ $rc -ne 0 ]; then echo "ABORT: search exit $rc"; rm -rf $T; exit 1; fi
 $F convertalis $T/q $T/db/$DBN $T/res $T/out.m8 --threads $SLURM_CPUS_PER_TASK \
   --format-output query,target,fident,alnlen,qlen,tlen,evalue,bits,prob,alntmscore,qtmscore,ttmscore,lddt,qcov,tcov
-echo "search exit $rc convertalis exit $?"
-if [ ! -e $T/out.m8 ]; then echo "ABORT: no output"; rm -rf $T; exit 1; fi
+rc=$?
+echo "search exit 0 convertalis exit $rc"
+if [ $rc -ne 0 ] || [ ! -e $T/out.m8 ]; then echo "ABORT: convertalis exit $rc or no output"; rm -rf $T; exit 1; fi
 cp $T/out.m8 $O/$DBN.m8
+rc=$?
+if [ $rc -ne 0 ]; then echo "ABORT: copy to $O/$DBN.m8 failed"; rm -rf $T; exit 1; fi
 echo "$DBN rows $(wc -l < $O/$DBN.m8); queries with a hit $(cut -f1 $O/$DBN.m8 | sort -u | wc -l); with E <= 1e-3 $(awk -F'\t' '$7<=1e-3{print $1}' $O/$DBN.m8 | sort -u | wc -l)"
 rm -rf $T; date
+# 2026-10-19: exit with the main commands' status so afterok dependencies see failures (CLAUDE.md rule)
+exit $rc
