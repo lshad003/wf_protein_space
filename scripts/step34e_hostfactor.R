@@ -1,4 +1,5 @@
-# Step 34e: host-factor tests on one gene set (usage: Rscript step34e_hostfactor.R <label> <counts.tsv.gz>).
+# Step 34e: host-factor tests on one gene set (usage: Rscript step34e_hostfactor.R <label> <counts.tsv.gz> [<output dir>]).
+# Optional third argument (Step 34s): outputs go to <output dir> instead of results/ (same names). Default unchanged.
 # Designs reused unchanged (prevalence filters, normalisation, models, permutation schemes):
 #   step22b_permanova_fix_n88.R  WF22 Bray-Curtis on Hellinger TMM-CPM, genes in >= 35 of 44; egg_mass + treatment by
 #                                whole-animal permutation on the balanced subset (42 samples, 14 animals); month
@@ -19,6 +20,8 @@
 suppressMessages({library(vegan); library(edgeR); library(limma)})
 a <- commandArgs(TRUE); LAB <- a[1]; CF <- a[2]
 W <- "/bigdata/stajichlab/lshad003/wf_protein_space"; R <- paste0(W, "/results/")
+if (length(a) > 2) R <- paste0(sub("/+$", "", a[3]), "/")
+cat("output dir:", R, "\n")
 O1 <- paste0(R, "step34e_", LAB, "_permanova.tsv"); O2 <- paste0(R, "step34e_", LAB, "_limma.tsv")
 if (file.exists(O1) || file.exists(O2)) stop("REFUSING: outputs exist for ", LAB)
 dir.create(paste0(R, "step34e_limma"), showWarnings=FALSE)

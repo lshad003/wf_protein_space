@@ -5,13 +5,17 @@
 # Inputs: results/step34a_rep_origin_v2_final.tsv, rep_classes_n88.tsv, fourway_classes_n88.tsv,
 # prevalence_primary_n88.tsv.gz, step34b2_catalog_stats_final.tsv, step34h_member_classes.tsv,
 # step34c_strict_eu_nmpfams2.tsv, step34c2c_strict_v2_families.tsv. Output: figures/fig2_unknown_fraction.pdf/.png
+# Optional arguments (Step 34s): <dir> <suffix>: read-based inputs (prevalence_primary_n88.tsv.gz, step34b2_catalog_stats_final.tsv) are read from <dir>; output
+#   figures/fig2_unknown_fraction<suffix>.pdf/.png. Default (no arguments) unchanged.
 import sys, csv, gzip
 import numpy as np
 sys.path.insert(0, "/bigdata/stajichlab/lshad003/wf_protein_space/scripts")
 import figstyle as fs
 import matplotlib.pyplot as plt
 fs.setup(); R = fs.W + "/results/"
-def rows(f): return list(csv.DictReader(open(R + f), delimiter="\t"))
+def rows(f, d=None): return list(csv.DictReader(open((d or R) + f), delimiter="\t"))
+D = sys.argv[1].rstrip("/") + "/" if len(sys.argv) > 1 else R; TAG = sys.argv[2] if len(sys.argv) > 2 else ""
+print("read-based inputs from", D)
 def tab(path, cols, op=open):
     with op(path, "rt") as f:
         h = f.readline().rstrip("\n").split("\t"); ix = [h.index(c) for c in cols]
@@ -26,10 +30,10 @@ for r, ln, co in tab(R + "fourway_classes_n88.tsv", ["rep", "length", "completen
     c = cls.get(r)
     if c: L[c].append(int(ln) / 3.0); P[c][co] = P[c].get(co, 0) + 1
 NS = {c: [] for c in CL}
-for r, n in tab(R + "prevalence_primary_n88.tsv.gz", ["gene", "n_samples"], gzip.open):
+for r, n in tab(D + "prevalence_primary_n88.tsv.gz", ["gene", "n_samples"], gzip.open):
     c = cls.get(r)
     if c: NS[c].append(int(n))
-st = {r["class"]: r for r in rows("step34b2_catalog_stats_final.tsv") if r["set"] == "strict_final"}
+st = {r["class"]: r for r in rows("step34b2_catalog_stats_final.tsv", D) if r["set"] == "strict_final"}
 NC = {c: sum(1 for v in cls.values() if v == c) for c in CL}
 print("classes:", NC, "| DUF/UPF-only K:", len(duf))
 print("lengths:", {c: len(L[c]) for c in CL}, "| prevalence rows:", {c: len(NS[c]) for c in CL})
@@ -93,4 +97,4 @@ for i, (lab, s) in enumerate(SETS):
     ax.text(2, i, "%.2f%% of %s" % (pu, format(len(s), ",")), va="center", color="white", fontsize=5); print("NMPFams2 %s: %d / %d unmatched" % (lab, u, len(s)))
 ax.set_yticks(range(len(SETS))); ax.set_yticklabels([s[0] for s in SETS], fontsize=5); ax.invert_yaxis(); ax.set_xlim(0, 100)
 ax.set_xlabel("% without an NMPFams2 match"); fs.letter(ax, "f")
-fs.save(fig, "fig2_unknown_fraction")
+fs.save(fig, "fig2_unknown_fraction" + TAG)

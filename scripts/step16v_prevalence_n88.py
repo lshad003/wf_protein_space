@@ -1,6 +1,8 @@
 # Step 16v n88: prevalence on results/count_matrix_primary_n88.tsv.gz with classes
 # from results/rep_classes_n88.tsv. Top bin is all 88 samples.
-import gzip
+# Optional arguments (Step 34s): <count matrix> <output dir>; writes <output dir>/prevalence_primary_n88.tsv.gz and
+# refuses to overwrite it. Default (no arguments) unchanged.
+import gzip, sys, os
 W="/bigdata/stajichlab/lshad003/wf_protein_space"
 cls={}
 with open(W+"/results/rep_classes_n88.tsv") as fh:
@@ -11,10 +13,14 @@ with open(W+"/results/rep_classes_n88.tsv") as fh:
 coh={}
 for ln in open(W+"/results/cohort_map.tsv"):
     s,c=ln.rstrip("\n").split("\t"); coh[s]=c
-fh=gzip.open(W+"/results/count_matrix_primary_n88.tsv.gz","rt")
+MAT,OD=(sys.argv[1],sys.argv[2].rstrip("/")) if len(sys.argv)>2 else (W+"/results/count_matrix_primary_n88.tsv.gz",W+"/results")
+OUTP=OD+"/prevalence_primary_n88.tsv.gz"
+if len(sys.argv)>2 and os.path.exists(OUTP): raise SystemExit("REFUSING: "+OUTP+" exists")
+print("count matrix:",MAT,"| output:",OUTP)
+fh=gzip.open(MAT,"rt")
 hdr=fh.readline().rstrip("\n").split("\t")[1:]
 cvec=[coh[s] for s in hdr]
-out=gzip.open(W+"/results/prevalence_primary_n88.tsv.gz","wt")
+out=gzip.open(OUTP,"wt")
 out.write("gene\tclass\tn_samples\tn_wf22\tn_wf23\tn_wf24\ttotal\n")
 import collections
 dist=collections.Counter(); byc=collections.defaultdict(collections.Counter)

@@ -3,8 +3,12 @@
 # 30 samples), Jaccard on presence >= 5 reads (variable genes); egg mass + treatment with whole-animal permutations,
 # month (2 vs 3) within animal, per-animal centroids; run tested at the level where it varies. 999 permutations,
 # set.seed(1). Output: results/step34l_m23_permanova.tsv
+# Optional arguments (Step 34s): <counts dir> <output file>; reads step34e_counts_<set>.tsv.gz from <counts dir>.
+#   Default (no arguments) unchanged.
 suppressMessages({library(vegan); library(edgeR); library(permute)})
 W <- "/bigdata/stajichlab/lshad003/wf_protein_space"; OUT <- paste0(W, "/results/step34l_m23_permanova.tsv")
+CD <- paste0(W, "/results"); aa <- commandArgs(TRUE); if (length(aa) > 1) { CD <- sub("/+$", "", aa[1]); OUT <- aa[2] }
+cat("counts dir:", CD, "| output:", OUT, "\n")
 if (file.exists(OUT)) stop("REFUSING: output exists")
 meta <- read.delim(paste0(W, "/metadata/wf22_design.tsv"), stringsAsFactors=FALSE)
 bt <- read.delim(paste0(W, "/results/batch_table_88.tsv"), stringsAsFactors=FALSE)
@@ -23,7 +27,7 @@ add <- function(set, metric, test, r) {
 h1 <- how(nperm=999, plots=Plots(strata=m$animal, type="free"), within=Within(type="none"))
 h2 <- how(nperm=999, plots=Plots(strata=m$animal, type="none"), within=Within(type="free"))
 for (lab in c("strict_final", "strict_final_EU")) {
-  cnt <- read.delim(gzfile(sprintf("%s/results/step34e_counts_%s.tsv.gz", W, lab)), row.names=1, check.names=FALSE)[, m$stem]
+  cnt <- read.delim(gzfile(sprintf("%s/step34e_counts_%s.tsv.gz", CD, lab)), row.names=1, check.names=FALSE)[, m$stem]
   a <- cnt[rowSums(cnt > 0) >= 24, ]; cat(lab, "genes in >= 24 of 30:", nrow(a), "\n")
   pr <- (cnt >= 5) * 1; pr <- pr[rowSums(pr) > 0 & rowSums(pr) < ncol(pr), ]
   for (metric in c("abundance_bray_hellinger", "presence_jaccard_ge5")) {

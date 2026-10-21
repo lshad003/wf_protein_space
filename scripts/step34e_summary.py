@@ -3,9 +3,12 @@
 # Old (whole n88 catalog, 2,067,011 supported reps): logs/step22b_n88.log, logs/step22c_n88.log, logs/step22e_n88.log,
 #   logs/step17g_n88.log, logs/step17h_n88.log, logs/step17i_n88.log (values copied below from those logs).
 # Output: results/step34e_summary.tsv; refuses to overwrite.
-import os
+# Optional argument (Step 34s): <dir>; reads the new tables from <dir> and writes <dir>/step34e_summary.tsv. The old
+#   columns stay the whole-catalog values below. Default (no argument) unchanged.
+import os, sys
 W = "/bigdata/stajichlab/lshad003/wf_protein_space"; R = W + "/results/"
-OUT = R + "step34e_summary.tsv"
+D = sys.argv[1].rstrip("/") + "/" if len(sys.argv) > 1 else R
+OUT = D + "step34e_summary.tsv"
 if os.path.exists(OUT): raise SystemExit("REFUSING: " + OUT + " exists")
 A, P = "abundance_bray_hellinger", "presence_jaccard_ge5"
 OLDP = {("WF22", A, "whole_animal_perm_balanced_42", "egg_mass"): ("0.32728", "0.001", "step22b_n88"),
@@ -35,7 +38,7 @@ for t, n in (("1", 0), ("2", 0), ("3", 3), ("5", 0), ("6", 0), ("7", 0)): OLDL[(
 OLDG = {"WF22": 367923, "WF23": 565822, "WF24_n34": 493896}
 def rd(p):
     rows = [l.rstrip("\n").split("\t") for l in open(p)]; return [dict(zip(rows[0], r)) for r in rows[1:]]
-new = {s: (rd(R + "step34e_%s_permanova.tsv" % s), rd(R + "step34e_%s_limma.tsv" % s)) for s in ("strict_final", "strict_final_EU")}
+new = {s: (rd(D + "step34e_%s_permanova.tsv" % s), rd(D + "step34e_%s_limma.tsv" % s)) for s in ("strict_final", "strict_final_EU")}
 out = [("kind", "cohort", "metric_or_model", "test", "term_or_coef", "old_whole_n88", "old_p", "old_source",
         "strict_final", "strict_final_p", "strict_final_EU", "strict_final_EU_p", "note")]
 keys = [(r["cohort"], r["metric"], r["test"], r["term"]) for r in new["strict_final"][0]]

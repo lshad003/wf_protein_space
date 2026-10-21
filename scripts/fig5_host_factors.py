@@ -3,6 +3,8 @@
 # outline = sequencing run, lines join each froglet's months. c, PERMANOVA R2 for all genes vs EU genes (filled:
 # p < 0.05). Inputs: results/fig_pcoa_wf22.tsv, results/batch_table_88.tsv, results/step34e_summary.tsv.
 # Output: figures/fig5_host_factors.pdf/.png
+# Optional arguments (Step 34s): <dir> <suffix>: read-based inputs (fig_pcoa_wf22.tsv, step34e_summary.tsv) are read from <dir>; output
+#   figures/fig5_host_factors<suffix>.pdf/.png. Default (no arguments) unchanged.
 import sys, csv
 import numpy as np
 sys.path.insert(0, "/bigdata/stajichlab/lshad003/wf_protein_space/scripts")
@@ -10,11 +12,13 @@ import figstyle as fs
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 fs.setup(); R = fs.W + "/results/"
-def rows(f): return list(csv.DictReader(open(R + f), delimiter="\t"))
+def rows(f, d=None): return list(csv.DictReader(open((d or R) + f), delimiter="\t"))
+D = sys.argv[1].rstrip("/") + "/" if len(sys.argv) > 1 else R; TAG = sys.argv[2] if len(sys.argv) > 2 else ""
+print("read-based inputs from", D)
 def num(x):
     try: return float(x)
     except (TypeError, ValueError): return None
-pc = rows("fig_pcoa_wf22.tsv"); bt = rows("batch_table_88.tsv"); bh = list(bt[0].keys())
+pc = rows("fig_pcoa_wf22.tsv", D); bt = rows("batch_table_88.tsv"); bh = list(bt[0].keys())
 sc = next(c for c in bh if c.lower() in ("stem", "sample", "sample_id"))
 rc = next((c for c in bh if "run" in c.lower()), None) or next(c for c in bh if "batch" in c.lower())
 print("batch table columns:", bh, "| using", sc, "and", rc); run = {r[sc]: r[rc] for r in bt}
@@ -37,7 +41,7 @@ h = [Line2D([], [], marker="o", linestyle="", color=EMC[e], markersize=4, label=
 h += [Line2D([], [], marker=MK[m], linestyle="", color="#BBBBBB", markersize=4, label="month %s" % m) for m in "123"]
 h += [Line2D([], [], marker="o", linestyle="", markerfacecolor="white", markeredgecolor=RC[x], markeredgewidth=1.0, markersize=4, label=x) for x in runs]
 fig.legend(handles=h, ncol=6, frameon=False, fontsize=4.8, loc="upper center", bbox_to_anchor=(0.5, 1.03))
-sm = rows("step34e_summary.tsv")
+sm = rows("step34e_summary.tsv", D)
 pr = [r for r in sm if r["kind"] == "permanova" and (r["term_or_coef"] in ("egg_mass", "month", "treatment") or (r["term_or_coef"] == "Model" and r["cohort"] in ("WF23", "WF24_n34")))
       and not any(k in r["test"].lower() for k in ("disp", "krus", "rich", "35"))
       and num(r["strict_final"]) is not None and num(r["strict_final_EU"]) is not None]
@@ -57,4 +61,4 @@ ax.legend(handles=[Line2D([], [], marker="o", linestyle="", color="#4477AA", mar
                    Line2D([], [], marker="o", linestyle="", color="#AA3377", markersize=4, label="EU genes"),
                    Line2D([], [], marker="o", linestyle="", markerfacecolor="white", markeredgecolor="#555555", markersize=4, label="p \u2265 0.05")],
           frameon=False, fontsize=5, loc="lower right"); fs.letter(ax, "c")
-fs.save(fig, "fig5_host_factors")
+fs.save(fig, "fig5_host_factors" + TAG)

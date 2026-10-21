@@ -14,9 +14,13 @@
 #   (catalog/db/LsPS_AA_95_rep.fasta, "*" stripped); the F1 left-edge exception kept no rep in step26a (all 112,903
 #   left-edge partials start within 10 nt), so F1 = partial 00. Prediction is checked against actual membership.
 # Outputs (refuse to overwrite): results/step34b2_catalog_stats_final.tsv, results/step34b2_nmpfams2_filter.tsv
-import os, gzip, collections, statistics
+# Optional arguments (Step 34s): <count matrix> <output dir>; same outputs, same names, written to <output dir>.
+#   Default (no arguments): results/count_matrix_primary_n88.tsv.gz, outputs in results/.
+import os, sys, gzip, collections, statistics
 W = "/bigdata/stajichlab/lshad003/wf_protein_space"; R = W + "/results/"
-O1, O2 = R + "step34b2_catalog_stats_final.tsv", R + "step34b2_nmpfams2_filter.tsv"
+MAT, OD = (sys.argv[1], sys.argv[2].rstrip("/") + "/") if len(sys.argv) > 2 else (R + "count_matrix_primary_n88.tsv.gz", R)
+O1, O2 = OD + "step34b2_catalog_stats_final.tsv", OD + "step34b2_nmpfams2_filter.tsv"
+print("count matrix:", MAT, "| output dir:", OD)
 for p in (O1, O2):
     if os.path.exists(p): raise SystemExit("REFUSING: " + p + " exists")
 CL = ["K", "KWP", "GU", "EU"]
@@ -41,7 +45,7 @@ with open(W + "/metadata/samples_88_treatment.tsv") as fh:
 SETS = ("strict_final", "strict")
 G = [(s, c) for s in SETS for c in CL]
 st = {g: [0] * 7 for g in G}  # n, len, complete, prev1, prev5, coh3_1, coh3_5
-with gzip.open(R + "count_matrix_primary_n88.tsv.gz", "rt") as fh:
+with gzip.open(MAT, "rt") as fh:
     hdr = fh.readline().rstrip("\n").split("\t")[1:]; ns = len(hdr); ci = [coh[s] for s in hdr]
     raw = {g: [0] * ns for g in G}; rpk = {g: [0.0] * ns for g in G}; TR = [0] * ns; TQ = [0.0] * ns
     for l in fh:

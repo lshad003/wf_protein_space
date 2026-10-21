@@ -3,6 +3,8 @@
 # c, strict representatives by cohort combination, stacked by class; d, per-metagenome share of catalog-mapped reads
 # assigned to strict representatives. Inputs: results/step34a_origin_by_class.tsv, results/fig_prep_accum_v2.tsv,
 # results/fig_prep_cohort_sharing.tsv, results/fig_prep_read_retention.tsv (Step 34k). Output: figures/fig1_catalog.*
+# Optional arguments (Step 34s): <dir> <suffix>: read-based inputs (fig_prep_read_retention.tsv) are read from <dir>; output
+#   figures/fig1_catalog<suffix>.pdf/.png. Default (no arguments) unchanged.
 import sys, csv
 import numpy as np
 sys.path.insert(0, "/bigdata/stajichlab/lshad003/wf_protein_space/scripts")
@@ -11,7 +13,9 @@ import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch, Rectangle
 fs.setup(); R = fs.W + "/results/"
-def rows(f): return list(csv.DictReader(open(R + f), delimiter="\t"))
+def rows(f, d=None): return list(csv.DictReader(open((d or R) + f), delimiter="\t"))
+D = sys.argv[1].rstrip("/") + "/" if len(sys.argv) > 1 else R; TAG = sys.argv[2] if len(sys.argv) > 2 else ""
+print("read-based inputs from", D)
 CL = ["K", "KWP", "GU", "EU"]; CC = {"K": "#4477AA", "KWP": "#66CCEE", "GU": "#CCBB44", "EU": "#AA3377"}
 OR = ["Tiara-prokaryotic", "<1 kb unclassified", "Tiara-unknown", "Tiara-eukaryotic other", "fly", "frog"]
 OC = dict(zip(OR, ["#0072B2", "#BBBBBB", "#888888", "#E69F00", "#D55E00", "#CC79A7"]))
@@ -70,7 +74,7 @@ for i in range(len(COMB)):
 print("strict reps with no eligible member:", sum(int(r["n_reps"]) for r in sh if r["combination"] == "none"))
 ax.set_xticks(range(len(COMB))); ax.set_xticklabels(LAB, fontsize=5.5); ax.set_ylabel("microbial representatives (thousands)")
 ax.set_ylim(0, bot.max() / 1e3 * 1.18); ax.legend(frameon=False, fontsize=5, loc="upper right", ncol=4); fs.letter(ax, "c")
-rr = rows("fig_prep_read_retention.tsv"); ax = fig.add_subplot(g[1, 2]); rng = np.random.default_rng(1)
+rr = rows("fig_prep_read_retention.tsv", D); ax = fig.add_subplot(g[1, 2]); rng = np.random.default_rng(1)
 for i, c in enumerate(("WF22", "WF23", "WF24")):
     sel = [r for r in rr if r["cohort"] == c]; v = [float(r["pct_retained"]) for r in sel]
     ax.boxplot([v], positions=[i], widths=0.5, showfliers=False, medianprops=dict(color="black", linewidth=0.8),
@@ -80,4 +84,4 @@ for i, c in enumerate(("WF22", "WF23", "WF24")):
     ax.text(i, 99.2, "%.1f%%" % pooled, ha="center", fontsize=5); print("%s pooled retention %.2f%%" % (c, pooled))
 ax.set_xticks([0, 1, 2]); ax.set_xticklabels(["WF22", "WF23", "WF24"]); ax.set_ylim(80, 100)
 ax.set_ylabel("catalog-mapped reads in microbial catalog (%)"); fs.letter(ax, "d")
-fs.save(fig, "fig1_catalog")
+fs.save(fig, "fig1_catalog" + TAG)
