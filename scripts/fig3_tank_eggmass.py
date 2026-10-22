@@ -1,6 +1,7 @@
 # Figure 3 additions (Step 34t): tank panel styled like Fig. 3d, observed tank-restricted EU and K reps vs permutation null
-# (mean +/- sd), WF24 egg mass 4 and WF23 egg mass 3, assembly presence and >= 5 reads at c_id95; and a stacked bar of
-# WF22 months 2-3 reps meeting the Step 34c3 rule in exactly 1, 2 or 3 egg masses (assembly).
+# (mean +/- sd; each class's own one-sided p under its point), WF24 egg mass 4 and WF23 egg mass 3, assembly presence and
+# >= 5 reads at c_id95 (panel f); and a stacked bar of WF22 months 2-3 reps meeting the Step 34c3 rule in exactly 1, 2 or
+# 3 egg masses (assembly; panel e).
 # Inputs: results/step34t/tank_restriction_c_id95.tsv, results/step34t/wf22_eggmass_breadth.tsv.
 # Outputs: figures/fig3_tank_panel.*, figures/fig3_wf22_eggmass_breadth.*
 import sys, csv
@@ -23,7 +24,9 @@ for ax, (mode, mlab) in zip(axes, MODES):
         ax.errorbar([float(r["null_mean"]) for r in rr], y, xerr=[float(r["null_sd"]) for r in rr], fmt="|", color="#AAAAAA", elinewidth=1.5, capsize=0)
         ax.scatter([int(r["observed_restricted"]) for r in rr], y, s=18, color=col, zorder=3, label=s + " observed")
         xmax = max(xmax, max(int(r["observed_restricted"]) for r in rr))
-        for yy, r in zip(y, rr): ax.text(int(r["observed_restricted"]) + 0.02 * xmax + 15, yy, format(int(r["observed_restricted"]), ","), va="center", fontsize=5)
+        for yy, r in zip(y, rr):
+            ax.text(int(r["observed_restricted"]) + 0.02 * xmax + 15, yy, format(int(r["observed_restricted"]), ","), va="center", fontsize=5)
+            ax.text(int(r["observed_restricted"]), yy + 0.09, "p = %.3f" % float(r["p_one_sided"]), ha="center", va="top", fontsize=4.2, color=col)
     for i, (c, _) in enumerate(CON):
         d = next(r for r in T if r["contrast"] == c and r["presence"] == mode and r["set"] == "D_EU_minus_K")
         ax.text(1.0, i + 0.42, "EU − K = %s, p = %.3f" % (format(int(d["observed_restricted"]), ","), float(d["p_one_sided"])),
@@ -36,9 +39,9 @@ for ax, (mode, mlab) in zip(axes, MODES):
     ax.set_title(mlab, fontsize=6); ax.set_xlabel("tank-restricted representatives\n(grey: permutation null, mean ± sd)")
 h, l = axes[0].get_legend_handles_labels()
 fig.legend(h, l, frameon=False, fontsize=5, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.12))
-fig.text(0.5, -0.2, "p: one-sided permutation test of the EU − K difference (1,000 tank-label permutations within the egg mass)",
-         ha="center", fontsize=5)
-fs.letter(axes[0], "e")
+fig.text(0.5, -0.27, "p under each point: that class vs its own null; EU − K p: one-sided permutation test of the EU − K difference\n"
+         "(both one-sided, 1,000 tank-label permutations within the egg mass)", ha="center", fontsize=5)
+fs.letter(axes[0], "f")
 fs.save(fig, "fig3_tank_panel")
 B = rows("wf22_eggmass_breadth.tsv")
 fig, ax = plt.subplots(figsize=(1.9, 2.0))
@@ -52,6 +55,7 @@ for i, (s, col) in enumerate((("EU", EU), ("K", KC))):
         bot += n
 ax.set_xticks([0, 1]); ax.set_xticklabels(["EU", "K"]); ax.set_xlim(-0.5, 1.75)
 for t, col in zip(ax.get_xticklabels(), (EU, KC)): t.set_color(col)
+fs.letter(ax, "e")
 ax.set_ylabel("representatives meeting the rule\n(≥ 50% of an egg mass's frogs, ≥ 3)")
 from matplotlib.patches import Patch
 ax.legend(handles=[Patch(facecolor=SH[k], edgecolor="black", linewidth=0.5, label="%s egg mass%s" % (k, "" if k == "1" else "es")) for k in ("3", "2", "1")],
