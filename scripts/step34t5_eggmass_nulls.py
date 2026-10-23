@@ -7,7 +7,9 @@
 #   one numpy default_rng(34) stream advanced in Step 34c3's order (EU assembly, EU reads >= 5, K assembly, ...), so the
 #   EU assembly null is permutations 1-1,000 and the K assembly null 2,001-3,000. p = (1 + #null >= obs) / 1,001.
 # Null "shared" (Step 34c3b): one default_rng(34) set of 1,000 permutations applied to EU and K together; gives the
-#   EU - K test (D 332). Reported alongside for comparison.
+#   EU - K test (D 332). 2026-10-23: Fig. 3d now uses the shared null for both classes and the EU - K line (Methods: both
+#   categories evaluated under the same permutations), so the shared rows come first and carry fig3d = 1; the step34c3 rows
+#   are kept for reference (fig3d = 0). The previous file is kept as wf22_eggmass_nulls.tsv.bak_20261023.
 # 95th percentile: numpy linear interpolation.
 # Reproduction (abort before writing): restricted EU 948 = 48/63/837, K 616 = 29/11/576; Step 34c3 null means
 #   EU 4.9/5.8/56.8, K 4.2/3.9/69.6 and p EU 0.0120/0.0140/0.0010, K 0.0310/0.0799/0.0010; D 332, null -7.1, p 0.0010.
@@ -67,7 +69,7 @@ rng = np.random.default_rng(34); sh = [list(rng.permutation(lab0)) for _ in rang
 PERMS[("shared", "EU")] = sh; PERMS[("shared", "K")] = sh
 NULL = {k: [restricted(P[k[1]], p) for p in v] for k, v in PERMS.items()}
 rows = []
-for meth in ("step34c3", "shared"):
+for meth in ("shared", "step34c3"):
     for st in ("EU", "K"):
         for e in EMS + ["all"]:
             n = np.array([x[e] for x in NULL[(meth, st)]]); o = obs[st][e]
@@ -76,8 +78,9 @@ for meth in ("step34c3", "shared"):
         for e in EMS + ["all"]:
             n = np.array([x[e] for x in NULL[(meth, "EU")]]) - np.array([x[e] for x in NULL[(meth, "K")]]); o = obs["EU"][e] - obs["K"][e]
             rows.append((meth, "D_EU_minus_K", e, lab0.count(e) if e != "all" else len(lab0), o, "%.2f" % n.mean(), "%.2f" % n.std(), "%.2f" % np.percentile(n, 95), "%.4f" % ((1 + int((n >= o).sum())) / (NPERM + 1))))
-print("\n%-9s %-13s %-9s %3s %5s %9s %8s %8s %7s" % ("null", "set", "egg_mass", "n", "obs", "mean", "sd", "p95", "p"))
-for r in rows: print("%-9s %-13s %-9s %3s %5s %9s %8s %8s %7s" % r)
+rows = [r + (1 if r[0] == "shared" else 0,) for r in rows]
+print("\n%-9s %-13s %-9s %3s %5s %9s %8s %8s %7s %5s" % ("null", "set", "egg_mass", "n", "obs", "mean", "sd", "p95", "p", "fig3d"))
+for r in rows: print("%-9s %-13s %-9s %3s %5s %9s %8s %8s %7s %5s" % r)
 T = {(r[0], r[1], r[2]): r for r in rows}; bad = []
 def ck(name, got, exp):
     print("CHECK %-48s got %-8s expected %-8s %s" % (name, got, exp, "PASS" if str(got) == str(exp) else "FAIL"))
@@ -92,6 +95,6 @@ ck("D null mean (raw mean, one decimal, as 34c3b)", "%.1f" % dn.mean(), "-7.1")
 ck("D p", T[("shared", "D_EU_minus_K", "all")][8], "0.0010")
 if bad: raise SystemExit("ABORT, reproduction failed, nothing written: %s" % bad)
 with open(OUT, "w") as o:
-    o.write("null\tset\tegg_mass\tn_froglets\tobserved_restricted\tnull_mean\tnull_sd\tnull_p95\tp_one_sided\n")
+    o.write("null\tset\tegg_mass\tn_froglets\tobserved_restricted\tnull_mean\tnull_sd\tnull_p95\tp_one_sided\tfig3d\n")
     for r in rows: o.write("\t".join(map(str, r)) + "\n")
 print("wrote", OUT)

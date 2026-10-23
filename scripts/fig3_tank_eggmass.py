@@ -1,12 +1,14 @@
 # Figure 3 panels d, e, f (Steps 34t, 34t2, 34t5), as functions imported by scripts/fig3_recurrence.py (six-panel Fig. 3);
 # run directly it writes the standalone panels.
 # d: WF22 egg-mass-restricted EU and K reps per egg mass (assembly, months 2-3), bars with a dark tick at the 95th
-#    percentile of that class's Step 34c3 null and one symbol for that class vs its own null; overall EU - K (Step 34c3b).
+#    percentile of that class's null and one symbol for that class vs its null; overall EU - K. All from one set of 1,000
+#    permutations shared by EU and K (Step 34c3b; rows fig3d = 1 in wf22_eggmass_nulls.tsv), as panel f.
 # e: stacked bar of WF22 months 2-3 reps meeting the Step 34c3 rule in exactly 1, 2 or 3 egg masses (assembly).
 # f: tank panel, grouped bars of tank-restricted EU and K reps with the 95th percentile of each null, WF24 egg mass 4 and
 #    WF23 egg mass 3, assembly presence and >= 5 reads at c_id95 (plus a slide version of WF24 EM4 assembly).
 # Inputs: results/step34t/wf22_eggmass_nulls.tsv, tank_run_check.tsv, tank_run_crosstab.tsv, wf22_eggmass_breadth.tsv.
-# Outputs (run directly): figures/fig3_tank_panel.*, figures/fig3_tank_panel_slide.*, figures/fig3_wf22_eggmass_breadth.*
+# Outputs (run directly): figures/fig3_tank_panel.*, figures/fig3_tank_panel_slide.*, figures/fig3_wf22_eggmass_breadth.*,
+#   figures/fig3_eggmass_panel_slide.*
 import sys, csv
 import numpy as np
 sys.path.insert(0, "/bigdata/stajichlab/lshad003/wf_protein_space/scripts")
@@ -53,20 +55,22 @@ def tank_panel(axes, cons, modes, fsz, bw=0.34):
         ax.set_xlim(-0.6, len(cons) - 0.4); ax.set_ylim(0, top * 1.5); ax.set_title(mlab, fontsize=fsz)
     axes[0].set_ylabel("tank-restricted representatives", fontsize=fsz)
     return handles()
-# Panel d (Step 34t5): per-class nulls "step34c3" (as Step 34c3), overall EU - K from the shared permutations (34c3b).
+# Panel d (Step 34t5): EU, K and EU - K all from the shared permutations (Step 34c3b), rows fig3d = 1.
 N = rows("wf22_eggmass_nulls.tsv")
+ND = "shared"
+if {r["null"] for r in N if r["fig3d"] == "1"} != {ND}: raise SystemExit("REFUSING: fig3d rows are not the shared null")
 def getd(n, s, e): return next(r for r in N if r["null"] == n and r["set"] == s and r["egg_mass"] == e)
 EMS = [("WF22_EM1", "EM1"), ("WF22_EM2", "EM2"), ("WF22_EM3", "EM3")]
 def eggmass_panel(ax, fsz, bw=0.34):
-    top = max(max(int(getd("step34c3", s, e)["observed_restricted"]), float(getd("step34c3", s, e)["null_p95"])) for e, _ in EMS for s in ("EU", "K"))
+    top = max(max(int(getd(ND, s, e)["observed_restricted"]), float(getd(ND, s, e)["null_p95"])) for e, _ in EMS for s in ("EU", "K"))
     for gi, (e, lab) in enumerate(EMS):
         for k, (s, col) in enumerate((("EU", EU), ("K", KC))):
-            r = getd("step34c3", s, e)
+            r = getd(ND, s, e)
             bars(ax, gi + (-0.5 + k) * bw, int(r["observed_restricted"]), float(r["null_p95"]), float(r["p_one_sided"]), col, bw, top, fsz)
-    d = getd("shared", "D_EU_minus_K", "all")
+    d = getd(ND, "D_EU_minus_K", "all")
     ax.text(0.02, 0.98, "EU − K, all egg masses: %s, p = %.3f" % (format(int(d["observed_restricted"]), ","), float(d["p_one_sided"])),
             transform=ax.transAxes, ha="left", va="top", fontsize=fsz)
-    ax.set_xticks(range(len(EMS))); ax.set_xticklabels(["%s\n(%s froglets)" % (lab, getd("step34c3", "EU", e)["n_froglets"]) for e, lab in EMS], fontsize=fsz)
+    ax.set_xticks(range(len(EMS))); ax.set_xticklabels(["%s\n(%s froglets)" % (lab, getd(ND, "EU", e)["n_froglets"]) for e, lab in EMS], fontsize=fsz)
     ax.tick_params(axis="y", labelsize=fsz)
     ax.set_xlim(-0.6, len(EMS) - 0.4); ax.set_ylim(0, top * 1.3); ax.set_ylabel("egg-mass-restricted representatives", fontsize=fsz)
     return handles()
@@ -90,19 +94,19 @@ def legend_d():
     print("\nLEGEND DRAFT, panel d")
     print("Egg-mass restriction, WF22 (15 froglets; months 2 and 3 pooled, presence = any assembled member in either sample): a")
     print("representative is egg-mass-restricted when present in >= 50% of one egg mass's froglets and in >= 3 of them, and absent from")
-    print("every froglet of the other two WF22 egg masses. 41,114 EU and 41,114 randomly drawn K representatives (seed 343).")
-    print("Chance = egg-mass labels reassigned among the 15 froglets with group sizes kept (3, 3, 9), 1,000 permutations per class.")
-    print("Dark tick: 95th percentile of that class's null. Symbol: that class vs its own null, one-sided; *** <= 0.001, ** <= 0.01,")
-    print("* <= 0.05, n.s. > 0.05. EU - K, all egg masses: the difference summed over egg masses, tested on 1,000 permutations shared by")
-    print("EU and K, one-sided.")
+    print("every froglet of the other two WF22 egg masses. 41,114 EU and 41,114 randomly drawn K representatives. Chance = egg-mass")
+    print("labels reassigned among the 15 froglets with group sizes kept (3, 3, 9), 1,000 permutations shared by EU and K. Dark tick:")
+    print("95th percentile of the class's null. Symbol: that class vs its null, one-sided; *** <= 0.001, ** <= 0.01, * <= 0.05,")
+    print("n.s. > 0.05. EU - K, all egg masses: the difference summed over egg masses, tested on the same permutations, one-sided.")
+    print("p-values not corrected for multiple comparisons.")
     for e, lab in EMS + [("all", "all")]:
         for s in ("EU", "K"):
-            r = getd("step34c3", s, e)
+            r = getd(ND, s, e)
             print("  %-4s %-3s obs %4s  p %.4f (%s)  null mean %s  sd %s  p95 %s" % (lab, s, r["observed_restricted"], float(r["p_one_sided"]),
                   star(float(r["p_one_sided"])), r["null_mean"], r["null_sd"], r["null_p95"]))
     for e, lab in EMS + [("all", "all")]:
-        r = getd("shared", "D_EU_minus_K", e)
-        print("  %-4s EU - K %4s  p %.4f  null mean %s  sd %s  p95 %s (shared permutations)" % (lab, r["observed_restricted"], float(r["p_one_sided"]), r["null_mean"], r["null_sd"], r["null_p95"]))
+        r = getd(ND, "D_EU_minus_K", e)
+        print("  %-4s EU - K %4s  p %.4f  null mean %s  sd %s  p95 %s " % (lab, r["observed_restricted"], float(r["p_one_sided"]), r["null_mean"], r["null_sd"], r["null_p95"]))
 def legend_f():
     print("\nLEGEND DRAFT, panel f")
     print("Tank restriction: a representative is tank-restricted when present in >= 50% of one tank's froglets and in >= 3 of them, and")
@@ -130,6 +134,10 @@ if __name__ == "__main__":
     hl = tank_panel([ax], CON[:1], MODES[:1], 11, bw=0.36)
     ax.set_xlim(-0.5, 0.5); ax.legend(handles=hl, frameon=False, fontsize=9, loc="upper center", ncol=1, bbox_to_anchor=(0.5, -0.18))
     fs.save(fig, "fig3_tank_panel_slide")
+    fig, ax = plt.subplots(figsize=(4.6, 3.8))
+    hl = eggmass_panel(ax, 11, bw=0.36)
+    ax.legend(handles=hl, frameon=False, fontsize=9, loc="upper center", ncol=3, bbox_to_anchor=(0.5, -0.2))
+    fs.save(fig, "fig3_eggmass_panel_slide")
     fs.setup()
     fig, ax = plt.subplots(figsize=(1.9, 2.0))
     breadth_panel(ax, 5); fs.letter(ax, "e")
