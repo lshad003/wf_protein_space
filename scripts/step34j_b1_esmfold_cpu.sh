@@ -23,6 +23,9 @@ export TORCH_HOME=/srv/projects/db/esm
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 hostname; date; echo "sequences $(grep -c '^>' $I)"
 /opt/linux/rocky/8.x/x86_64/pkgs/esm/2.0.0/env/bin/esm-fold -i $I -o $OUT --chunk-size 64 --cpu-only
-echo "exit $?"; date
+rc=$?
+echo "exit $rc"; date
 n=0; for id in $(grep '^>' $I | cut -c2-); do [ -s $OUT/$id.pdb ] && n=$((n+1)); done
 echo "models written for this chunk: $n of $(grep -c '^>' $I)"
+# 2026-10-23: exit with esm-fold's status so afterok dependencies see failures (CLAUDE.md rule)
+exit $rc

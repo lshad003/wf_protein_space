@@ -16,4 +16,7 @@ export TORCH_HOME=/srv/projects/db/esm
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 hostname; date
 /opt/linux/rocky/8.x/x86_64/pkgs/esm/2.0.0/env/bin/esm-fold -i $W/results/def84_fold.faa -o $OUT --chunk-size 64 --cpu-only
-echo "exit $?"; date; ls $OUT | grep -c "\.pdb$"
+rc=$?
+echo "exit $rc"; date; ls $OUT | grep -c "\.pdb$"
+# 2026-10-23: exit with esm-fold's status so afterok dependencies see failures (CLAUDE.md rule)
+exit $rc
