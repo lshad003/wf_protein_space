@@ -3,6 +3,7 @@
 # Cse2/CasB-like protein superposed on E. coli CasB (PDB 5H9E chain C), PyMOL render; d, its type I-E cas locus;
 # e, Step 34j Foldseek hit class of the ESMFold models (EU family models vs controls) by mean C-alpha pLDDT bin
 # (results/step34j/models_by_set_plddt_v2.tsv; ProtNLM-only UniProt names counted as unannotated).
+# Slide versions of a and e: figures/fig4a_slide.*, figures/fig4e_slide.* (2026-10-23).
 # 2026-10-23: Table S6 (results/supp_fold_candidates.tsv) is no longer written here; scripts/step34j_d2_tables.py
 # rebuilds it from the Step 34j representative models.
 import sys, csv
@@ -18,13 +19,17 @@ COL = {"queries": "#AA3377", "K": "#4477AA", "decoys": "#999999"}
 NAME = {"queries": "Recurrent EU families", "K": "Known, length-matched", "decoys": "Reversed decoys"}
 fig = plt.figure(figsize=(7.08, 4.9))
 g = fig.add_gridspec(2, 3, width_ratios=[1, 1, 1.2], height_ratios=[1, 0.75], hspace=0.6, wspace=0.5)
-be = rows("fig_prep_bestE.tsv"); xs = np.linspace(0, 20, 401); ax = fig.add_subplot(g[0, 0])
-for s in ("K", "queries", "decoys"):
-    v = np.array([-np.log10(float(r["bestE"])) if r["bestE"] != "NA" else -1.0 for r in be if r["set"] == s])
-    ax.plot(xs, [100.0 * (v >= x).mean() for x in xs], color=COL[s], linewidth=0.9, label=NAME[s])
-ax.axvline(3, color="#555555", linewidth=0.5, linestyle=(0, (2, 2)))
-ax.set_xlabel("$-$log$_{10}$ best E-value"); ax.set_ylabel("Sequences at or beyond (%)"); ax.set_xlim(0, 20); ax.set_ylim(0, 70)
-ax.legend(frameon=False, fontsize=5, loc="upper right", handlelength=1.2); fs.letter(ax, "a")
+be = rows("fig_prep_bestE.tsv")
+def panel_a(ax, k=1.0):   # k scales fonts and lines (1 = Fig. 4; slides use more)
+    xs = np.linspace(0, 20, 401)
+    for s in ("K", "queries", "decoys"):
+        v = np.array([-np.log10(float(r["bestE"])) if r["bestE"] != "NA" else -1.0 for r in be if r["set"] == s])
+        ax.plot(xs, [100.0 * (v >= x).mean() for x in xs], color=COL[s], linewidth=0.9 * k ** 0.5, label=NAME[s])
+    ax.axvline(3, color="#555555", linewidth=0.5 * k ** 0.5, linestyle=(0, (2, 2)))
+    ax.set_xlabel("$-$log$_{10}$ best E-value", fontsize=6 * k); ax.set_ylabel("Sequences at or beyond (%)", fontsize=6 * k)
+    ax.set_xlim(0, 20); ax.set_ylim(0, 70); ax.tick_params(labelsize=5.5 * k)
+    ax.legend(frameon=False, fontsize=5 * k, loc="upper right", handlelength=1.2)
+ax = fig.add_subplot(g[0, 0]); panel_a(ax); fs.letter(ax, "a")
 bl = rows("step34d2_by_length_fixed.tsv"); SN = sorted({r["set"] for r in bl})
 pick = {"queries": next(n for n in SN if "quer" in n), "K": next(n for n in SN if n.startswith("K")), "decoys": next(n for n in SN if "decoy" in n)}
 BIN = ["<100", "100-199", "200-399", ">=400"]; ax = fig.add_subplot(g[0, 1])
@@ -82,19 +87,24 @@ HC = [("experimental", "PDB or CATH50", "#333333"), ("AFDB_annotated", "AFDB50, 
       ("AFDB_unannotated_only", "AFDB50, unannotated only", "#BBBBBB"), ("ESMAtlas_only", "ESM Atlas only", "#E3E3E3"), ("none", "no hit", "#FFFFFF")]
 MB = [r for r in csv.DictReader(open(R + "step34j/models_by_set_plddt_v2.tsv"), delimiter="\t") if r["protnlm_rule"] == "unannotated"]
 PB = [(">=70", "\u226570"), ("50-70", "50\u201370"), ("<50", "<50")]
-ax = fig.add_subplot(g[1, 2]); xs, xl = [], []
-for gi, (st, sl) in enumerate((("EU", "EU"), ("control", "Known"))):
-    for bi, (b, bl) in enumerate(PB):
-        r = next(r for r in MB if r["set"] == st and r["plddt_bin"] == b); n = int(r["n_models"]); x = gi * 3.6 + bi; bot = 0
-        for k, _, c in HC:
-            v = 100.0 * int(r[k]) / n; ax.bar(x, v, 0.8, bottom=bot, color=c, edgecolor=COL["queries" if st == "EU" else "K"], linewidth=0.5); bot += v
-        ax.text(x, 101.5, format(n, ","), ha="center", va="bottom", fontsize=4.5)
-        xs.append(x); xl.append(bl)
-        print("Fig. 4e %s pLDDT %s: n %d, %s" % (st, b, n, ", ".join("%s %s" % (k, r[k]) for k, _, _ in HC)))
-ax.set_xticks(xs); ax.set_xticklabels(xl, fontsize=5); ax.set_ylim(0, 108); ax.set_ylabel("Models (%)")
-for gi, (st, sl) in enumerate((("EU", "EU families"), ("control", "Known"))):
-    ax.text(gi * 3.6 + 1, -24, sl, ha="center", va="top", fontsize=5.5, color=COL["queries" if st == "EU" else "K"])
-ax.text(3.1, -13, "pLDDT", ha="center", va="top", fontsize=5)
-ax.legend(handles=[Patch(facecolor=c, edgecolor="#333333", linewidth=0.4, label=l) for _, l, c in HC], frameon=False, fontsize=5,
-          loc="upper left", bbox_to_anchor=(1.0, 1.0), handlelength=1.0); fs.letter(ax, "e")
+def panel_e(ax, k=1.0):
+    xs, xl = [], []
+    for gi, (st, sl) in enumerate((("EU", "EU"), ("control", "Known"))):
+        for bi, (b, bl) in enumerate(PB):
+            r = next(r for r in MB if r["set"] == st and r["plddt_bin"] == b); n = int(r["n_models"]); x = gi * 3.6 + bi; bot = 0
+            for kk, _, c in HC:
+                v = 100.0 * int(r[kk]) / n; ax.bar(x, v, 0.8, bottom=bot, color=c, edgecolor=COL["queries" if st == "EU" else "K"], linewidth=0.5 * k ** 0.5); bot += v
+            ax.text(x, 101.5, format(n, ","), ha="center", va="bottom", fontsize=4.5 * k)
+            xs.append(x); xl.append(bl)
+            if k == 1.0: print("Fig. 4e %s pLDDT %s: n %d, %s" % (st, b, n, ", ".join("%s %s" % (kk, r[kk]) for kk, _, _ in HC)))
+    ax.set_xticks(xs); ax.set_xticklabels(xl, fontsize=5 * k); ax.set_ylim(0, 108); ax.set_ylabel("Models (%)", fontsize=6 * k); ax.tick_params(axis="y", labelsize=5.5 * k)
+    for gi, (st, sl) in enumerate((("EU", "EU families"), ("control", "Known"))):
+        ax.text(gi * 3.6 + 1, -24, sl, ha="center", va="top", fontsize=5.5 * k, color=COL["queries" if st == "EU" else "K"])
+    ax.text(3.1, -13, "pLDDT", ha="center", va="top", fontsize=5 * k)
+    ax.legend(handles=[Patch(facecolor=c, edgecolor="#333333", linewidth=0.4, label=l) for _, l, c in HC], frameon=False, fontsize=5 * k,
+              loc="upper left", bbox_to_anchor=(1.0, 1.0), handlelength=1.0)
+ax = fig.add_subplot(g[1, 2]); panel_e(ax); fs.letter(ax, "e")
 fs.save(fig, "fig4_structure")
+# Slide versions of a and e (same panel functions, fonts x2): figures/fig4a_slide.*, figures/fig4e_slide.*
+fig, ax = plt.subplots(figsize=(4.6, 3.6)); panel_a(ax, 2.0); fs.save(fig, "fig4a_slide")
+fig, ax = plt.subplots(figsize=(5.2, 3.8)); panel_e(ax, 2.0); fs.save(fig, "fig4e_slide")
