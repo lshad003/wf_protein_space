@@ -14,9 +14,11 @@
 #   6 the rest
 #   Within a tier: Jaccard context percentile vs controls (desc), NR contexts (desc), confident qTM (desc), family ID.
 # Outputs (refuse to overwrite): results/step34j_matrix.tsv, results/step34j_top20.tsv
+# 2026-10-22: reads results/step34j_structures_v2.tsv (b4 with the UniProt gap closed) and writes step34j_matrix_v2.tsv,
+#   step34j_top20_v2.tsv; run 1 (job 30171186) outputs step34j_matrix.tsv, step34j_top20.tsv kept.
 import os, sys, collections
 sys.path.insert(0, "/bigdata/stajichlab/lshad003/wf_protein_space/scripts"); import step34j_themes as TH
-R = "/bigdata/stajichlab/lshad003/wf_protein_space/results/"; OM, OT = R + "step34j_matrix.tsv", R + "step34j_top20.tsv"
+R = "/bigdata/stajichlab/lshad003/wf_protein_space/results/"; OM, OT = R + "step34j_matrix_v2.tsv", R + "step34j_top20_v2.tsv"
 for p in (OM, OT):
     if os.path.exists(p): raise SystemExit("REFUSING: " + p + " exists")
 def tsv(p):
@@ -29,7 +31,7 @@ for r in tsv(R + "step34h_member_classes.tsv"):
     if r["family_rep"] in fam: mc[r["family_rep"]].append(r); part[r["rep"]] = r["rep_partial"]
 qm = {r["family_rep"]: r for r in tsv(R + "step34d_query_map.tsv")}
 ctx = {r["family_rep"]: r for r in tsv(R + "step34j/context_all_families.tsv")}
-st = {r["family_rep"]: r for r in tsv(R + "step34j_structures.tsv") if r["set"] == "EU"}
+st = {r["family_rep"]: r for r in tsv(R + "step34j_structures_v2.tsv") if r["set"] == "EU"}
 if len(fam) != 4509 or len(ctx) != 4509: raise SystemExit("ABORT: family counts %d %d" % (len(fam), len(ctx)))
 def fl(x, d=-1.0):
     try: return float(x)

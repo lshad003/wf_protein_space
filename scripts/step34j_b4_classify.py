@@ -19,11 +19,28 @@
 #   fixed set plus results/step34d2_prostt5/krepl_vs_*.tsv; hit = best E <= 1e-3.
 # Outputs (refuse to overwrite): results/step34j_structures.tsv (one row per model), results/step34j/structures_by_bin.tsv,
 #   results/step34j/structures_vs_prostt5.tsv, results/step34j/uniprot/.
-import os, re, glob, subprocess, collections, time
+# 2026-10-22 patch (UniProt gap; run 1 = job 30171185 wrote the outputs above with 31,660 of 88,365 accessions resolved):
+#   no download; reads the saved responses in results/step34j/uniprot/ (aborts unless the batch count matches the
+#   requested list), maps secondary accessions back to the requested ones (results/step34j/uniprot_unisave/sec_acc/*.json.gz,
+#   scripts/step34j_b4a_unisave_fetch.py part A), and for accessions still unresolved reads the last UniSave version
+#   (uniprot_unisave/unisave_raw.jsonl, part B; name = first top-level DE RecName/SubName Full=, Pfam/InterPro from DR
+#   lines). Same annotation rule for all three sources. New column afdb_annot_sources (sources of the annotated top-25
+#   accessions: live, secondary, unisave). Outputs under new names (_v2); run 1 outputs are kept.
+# 2026-10-23 ProtNLM rule: a name whose evidence is only ECO:0008006 (Google ProtNLM, predicted) does not count as an
+#   informative name; the entry is then annotated only through Pfam/InterPro. Live entries: evidence of the first
+#   recommendedName/submissionNames fullName in the saved full JSON (sec_acc/*.json.gz, which holds every live entry);
+#   secondary: that of the primary; UniSave: the {...} evidence of the DE name line. hit_class, structure_confident_annotated
+#   and the confident/best columns follow this rule (c1 uses them); hit_class_protnlm_annotated and
+#   structure_confident_protnlm_annotated give the rule that accepts ProtNLM names. structures_by_bin_v2.tsv has a column
+#   protnlm_rule (unannotated / annotated) with both.
+import os, re, glob, subprocess, collections, time, json
 W = "/bigdata/stajichlab/lshad003/wf_protein_space"; R = W + "/results/"; D = R + "step34j/"
-OS, OB, OP, UD = R + "step34j_structures.tsv", D + "structures_by_bin.tsv", D + "structures_vs_prostt5.tsv", D + "uniprot/"
-for p in (OS, OB, OP, UD):
+OS, OB, OP, UD = R + "step34j_structures_v2.tsv", D + "structures_by_bin_v2.tsv", D + "structures_vs_prostt5_v2.tsv", D + "uniprot/"
+US = D + "uniprot_unisave/"
+for p in (OS, OB, OP, D + "uniprot_annotation_v2.tsv"):
     if os.path.exists(p): raise SystemExit("REFUSING: " + p + " exists")
+for p in (UD, US + "sec_acc", US + "unisave_raw.jsonl"):
+    if not os.path.exists(p): raise SystemExit("ABORT: missing input " + p)
 E_HIT = 1e-3
 lab = {}
 with open(D + "esmfold_input_labels.tsv") as fh:
@@ -79,19 +96,64 @@ for m, hs in hits["AFDB50"].items():
             if a: want.add(a)
 nacc_fail = sum(1 for hs in hits["AFDB50"].values() for h in hs if h.get("top25") and not acc(h["target"]))
 print("AFDB accessions to fetch %d (top-25 hits whose target name gave no accession: %d)" % (len(want), nacc_fail))
-os.makedirs(UD); want = sorted(want); up = {}
+want = sorted(want); up = {}; src = {}
+nb = (len(want) + 499) // 500
+if len(glob.glob(UD + "batch_*.tsv")) != nb: raise SystemExit("ABORT: %d saved batches, %d expected" % (len(glob.glob(UD + "batch_*.tsv")), nb))
+live = {}
 for bi in range(0, len(want), 500):
     out = UD + "batch_%05d.tsv" % (bi // 500)
-    url = "https://rest.uniprot.org/uniprotkb/accessions?accessions=%s&fields=accession,protein_name,xref_pfam,xref_interpro&format=tsv&size=500" % ",".join(want[bi:bi + 500])
-    for attempt in range(5):
-        r = subprocess.run(["curl", "-sS", "-f", "-o", out, url])
-        if r.returncode == 0: break
-        time.sleep(10 * (attempt + 1))
-    else: raise SystemExit("ABORT: UniProt batch %d failed" % (bi // 500))
     for l in list(open(out))[1:]:
         f = l.rstrip("\n").split("\t") + ["", "", ""]
-        up[f[0]] = (f[1], [x for x in f[2].split(";") if x], [x for x in f[3].split(";") if x])
-print("UniProt entries returned %d of %d requested" % (len(up), len(want)))
+        live[f[0]] = (f[1], [x for x in f[2].split(";") if x], [x for x in f[3].split(";") if x])
+for a in want:
+    if a in live: up[a] = live[a]; src[a] = "live"
+print("UniProt saved entries %d; requested accessions answered directly %d of %d" % (len(live), len(up), len(want)))
+sec = {}; pnlm_live = {}; pnlm = {}
+import gzip
+for f in sorted(glob.glob(US + "sec_acc/batch_*.json.gz")):
+    for x in json.load(gzip.open(f, "rt"))["results"]:
+        for s2 in x.get("secondaryAccessions", []): sec.setdefault(s2, set()).add(x["primaryAccession"])
+        pd = x.get("proteinDescription", {})
+        fn = pd["recommendedName"]["fullName"] if "recommendedName" in pd else pd["submissionNames"][0]["fullName"] if pd.get("submissionNames") else {}
+        ev = [e.get("evidenceCode") for e in fn.get("evidences", [])]
+        pnlm_live[x["primaryAccession"]] = bool(ev) and all(e == "ECO:0008006" for e in ev)
+nsec = 0
+for a in want:
+    if a in up or a not in sec: continue
+    p = [q for q in sec[a] if q in live]
+    if len(p) == 1: up[a] = live[p[0]]; src[a] = "secondary"; nsec += 1; pnlm[a] = pnlm_live[p[0]]
+for a in want:
+    if src.get(a) == "live": pnlm[a] = pnlm_live[a]
+print("mapped back via secondary accession %d (saved entries with sec_acc lists %d)" % (nsec, len({q for v in sec.values() for q in v})))
+def flat(t):
+    nm = None; ev = ""; pf, ip = [], []; sub = False
+    for l in t.splitlines():
+        if l.startswith("DE   "):
+            s2 = l[5:]
+            if s2.startswith(("Contains:", "Includes:")): sub = True
+            m = re.match(r"\s*(RecName|SubName): Full=(.*?)(\s*\{[^}]*\})?;\s*$", s2)
+            if m and not sub and nm is None and not s2.startswith(" "): nm = m.group(2); ev = m.group(3) or ""
+        elif l.startswith("DR   Pfam; "): pf.append(l.split(";")[1].strip())
+        elif l.startswith("DR   InterPro; "): ip.append(l.split(";")[1].strip())
+    codes = re.findall(r"ECO:\d+", ev)
+    return nm, pf, ip, bool(codes) and all(c == "ECO:0008006" for c in codes)
+uns = collections.Counter(); unsrec = {}
+for l in open(US + "unisave_raw.jsonl"):
+    try: r = json.loads(l)
+    except ValueError: continue   # a line cut by a cancelled fetch run; that accession is refetched on resume
+    if r["status"] != "failed" or r["acc"] not in unsrec: unsrec[r["acc"]] = r
+nus = 0
+for a in want:
+    if a in up: continue
+    r = unsrec.get(a)
+    if r is None: uns["absent"] += 1; continue
+    uns[r["status"]] += 1
+    if r["status"] != "ok": continue
+    nm, pf, ip, pn = flat(r["txt_raw"])
+    up[a] = (nm or "", pf, ip); src[a] = "unisave"; nus += 1; pnlm[a] = pn
+print("UniSave for the still-unresolved: %s; resolved %d" % (dict(uns), nus))
+print("UniProt entries resolved %d of %d requested (live %d, secondary %d, unisave %d)" % (len(up), len(want),
+      sum(1 for v in src.values() if v == "live"), nsec, nus))
 pfn = {}; cur = None
 for l in open("/srv/projects/db/pfam/2026-01-27-Pfam38.2/Pfam-A.hmm.dat"):
     if l.startswith("#=GF ID"): cur = [l.split()[2], None]
@@ -110,10 +172,21 @@ def pf_inf(a):
 def ip_inf(a):
     x = ipn.get(a)
     return bool(x) and not re.search(r"unknown function|uncharacteri[sz]ed|\bDUF\d|\bUPF\d", x, re.I)
-def annotated(a):
+def annotated(a, strict=True):
     if a not in up: return False
     n, pf, ip = up[a]
-    return informative_name(n) or any(pf_inf(x) for x in pf) or any(ip_inf(x) for x in ip)
+    return (informative_name(n) and not (strict and pnlm[a])) or any(pf_inf(x) for x in pf) or any(ip_inf(x) for x in ip)
+print("\nresolved entries by source: n | informative name | of those ProtNLM-only | non-ProtNLM informative name | informative Pfam/InterPro | annotated (ProtNLM as unannotated) | annotated (ProtNLM accepted)")
+for sname in ("live", "secondary", "unisave", "all"):
+    A = [a for a in up if sname == "all" or src[a] == sname]
+    inf = [a for a in A if informative_name(up[a][0])]
+    print("  %-9s %6d | %6d | %6d | %6d | %6d | %6d | %6d" % (sname, len(A), len(inf), sum(pnlm[a] for a in inf), sum(not pnlm[a] for a in inf),
+          sum(any(pf_inf(x) for x in up[a][1]) or any(ip_inf(x) for x in up[a][2]) for a in A), sum(annotated(a) for a in A), sum(annotated(a, False) for a in A)))
+with open(D + "uniprot_annotation_v2.tsv", "w") as o:
+    o.write("accession\tsource\tname\tname_informative\tname_protnlm_only\tpfam\tinterpro\tannotated_protnlm_unannotated\tannotated_protnlm_accepted\n")
+    for a in sorted(up):
+        n, pf, ip = up[a]
+        o.write("%s\t%s\t%s\t%d\t%d\t%s\t%s\t%d\t%d\n" % (a, src[a], n.replace("\t", " ") or "-", informative_name(n), pnlm[a], ";".join(pf) or "-", ";".join(ip) or "-", annotated(a), annotated(a, False)))
 pdbt = {}
 for l in open(D + "ref_pdb/entries.idx", encoding="latin-1"):
     f = l.rstrip("\n").split("\t")
@@ -153,16 +226,20 @@ for i, (s, fam, L) in sorted(lab.items()):
     p = plddt.get(i)
     ex = hits["PDB"].get(i, []) + hits["CATH50"].get(i, [])
     af = hits["AFDB50"].get(i, []); es = hits["ESMAtlas30"].get(i, [])
-    afa = [h for h in af if h.get("top25") and annotated(acc(h["target"]) or "")]
-    if p is None: cls = "no_model"
-    elif ex: cls = "experimental"
-    elif afa: cls = "AFDB_annotated"
-    elif af: cls = "AFDB_unannotated_only"
-    elif es: cls = "ESMAtlas_only"
-    else: cls = "none"
-    top = {"experimental": ex, "AFDB_annotated": afa, "AFDB_unannotated_only": af, "ESMAtlas_only": es}.get(cls, [])
+    def classify(strict):
+        afa = [h for h in af if h.get("top25") and annotated(acc(h["target"]) or "", strict)]
+        if p is None: cls = "no_model"
+        elif ex: cls = "experimental"
+        elif afa: cls = "AFDB_annotated"
+        elif af: cls = "AFDB_unannotated_only"
+        elif es: cls = "ESMAtlas_only"
+        else: cls = "none"
+        top = {"experimental": ex, "AFDB_annotated": afa, "AFDB_unannotated_only": af, "ESMAtlas_only": es}.get(cls, [])
+        conf = int(cls in ("experimental", "AFDB_annotated") and p is not None and p >= 70 and any(ok(h) for h in top))
+        return afa, cls, top, conf
+    afa, cls, top, conf = classify(True)
+    _, cls2, _, conf2 = classify(False)
     b = best(top)
-    conf = int(cls in ("experimental", "AFDB_annotated") and p is not None and p >= 70 and any(ok(h) for h in top))
     def dbcols(db):
         h = best(hits[db].get(i, []))
         return [h["target"], "%.2e" % h["e"], "%.3f" % h["qtm"], "%.3f" % h["prob"], h["unit"]] if h else ["-"] * 5
@@ -174,24 +251,27 @@ for i, (s, fam, L) in sorted(lab.items()):
     rows.append([i, s, fam, L, lbin(L), "%.2f" % p if p is not None else "NA", eplddt.get(i, "NA"), ptm.get(i, "NA"), pbin(p), ndom.get(i, 0),
                  cls, bdb or "-", b["target"] if b else "-", "%.2e" % b["e"] if b else "-", tname(bdb, b["target"]) if b else "-",
                  conf, bcdb or "-", bc["target"] if bc else "-", "%.3f" % bc["qtm"] if bc else "-", tname(bcdb, bc["target"]) if bc else "-",
-                 int(i in prost)] + dbcols("PDB") + dbcols("CATH50") + dbcols("AFDB50") + dbcols("ESMAtlas30"))
+                 int(i in prost)] + dbcols("PDB") + dbcols("CATH50") + dbcols("AFDB50") + dbcols("ESMAtlas30")
+                + [",".join(sorted({src[acc(h["target"])] for h in afa})) or "-", cls2, conf2])
 H = ["id", "set", "family_rep", "length_aa", "length_bin", "mean_ca_plddt", "esmfold_plddt", "ptm", "plddt_bin", "n_merizo_domains",
      "hit_class", "best_db", "best_target", "best_evalue", "best_target_name", "structure_confident_annotated", "confident_db",
      "confident_target", "confident_qtm", "confident_target_name", "prostt5_hit"]
 for db in ("PDB", "CATH50", "AFDB50", "ESMAtlas30"): H += ["%s_%s" % (db, x) for x in ("target", "evalue", "qtm", "prob", "unit")]
+H += ["afdb_annot_sources", "hit_class_protnlm_annotated", "structure_confident_protnlm_annotated"]
 with open(OS, "w") as o:
     o.write("\t".join(H) + "\n")
     for r in rows: o.write("\t".join(map(str, r)).replace("\n", " ") + "\n")
 CL = ["experimental", "AFDB_annotated", "AFDB_unannotated_only", "ESMAtlas_only", "none", "no_model"]
 with open(OB, "w") as o:
-    o.write("set\tbin_type\tbin\tn\t" + "\t".join("%s\tpct_%s" % (c, c) for c in CL) + "\tstructure_confident_annotated\n")
-    for s in ("EU", "control"):
-        for bt, idx, bins in (("all", None, ["all"]), ("length", 4, ["<100", "100-199", "200-399", ">=400"]), ("plddt", 8, ["<50", "50-70", ">=70"])):
-            for bn in bins:
-                R2 = [r for r in rows if r[1] == s and (idx is None or r[idx] == bn)]
-                c = collections.Counter(r[10] for r in R2); n = len(R2)
-                o.write("%s\t%s\t%s\t%d\t%s\t%d\n" % (s, bt, bn, n, "\t".join("%d\t%.2f" % (c[k], 100.0 * c[k] / n if n else 0) for k in CL), sum(r[15] for r in R2)))
-                print("%-7s %-6s %-8s n=%-5d %s | confident %d" % (s, bt, bn, n, " ".join("%s %d" % (k, c[k]) for k in CL), sum(r[15] for r in R2)))
+    o.write("protnlm_rule\tset\tbin_type\tbin\tn\t" + "\t".join("%s\tpct_%s" % (c, c) for c in CL) + "\tstructure_confident_annotated\n")
+    for rule, ci, fi in (("unannotated", 10, 15), ("annotated", -2, -1)):
+        for s in ("EU", "control"):
+            for bt, idx, bins in (("all", None, ["all"]), ("length", 4, ["<100", "100-199", "200-399", ">=400"]), ("plddt", 8, ["<50", "50-70", ">=70"])):
+                for bn in bins:
+                    R2 = [r for r in rows if r[1] == s and (idx is None or r[idx] == bn)]
+                    c = collections.Counter(r[ci] for r in R2); n = len(R2)
+                    o.write("%s\t%s\t%s\t%s\t%d\t%s\t%d\n" % (rule, s, bt, bn, n, "\t".join("%d\t%.2f" % (c[k], 100.0 * c[k] / n if n else 0) for k in CL), sum(r[fi] for r in R2)))
+                    print("ProtNLM %-11s %-7s %-6s %-8s n=%-5d %s | confident %d" % (rule, s, bt, bn, n, " ".join("%s %d" % (k, c[k]) for k in CL), sum(r[fi] for r in R2)))
 with open(OP, "w") as o:
     o.write("set\tprostt5_hit\tn\t" + "\t".join(CL) + "\n")
     for s in ("EU", "control"):
@@ -199,4 +279,4 @@ with open(OP, "w") as o:
             R2 = [r for r in rows if r[1] == s and r[20] == ph]; c = collections.Counter(r[10] for r in R2)
             o.write("%s\t%d\t%d\t%s\n" % (s, ph, len(R2), "\t".join(str(c[k]) for k in CL)))
             print("ProstT5 %s hit=%d n=%d: %s" % (s, ph, len(R2), " ".join("%s %d" % (k, c[k]) for k in CL)))
-print("wrote", OS, OB, OP)
+print("wrote", OS, OB, OP, D + "uniprot_annotation_v2.tsv")

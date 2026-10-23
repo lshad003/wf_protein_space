@@ -1,20 +1,23 @@
 # Figure 4. a, best ProstT5/Foldseek E-value per sequence (PDB or CATH50) for recurrent EU families, length-matched known
 # proteins and reversed decoys; b, structural match rate by length (Wilson 95% CI); c, ESMFold model of the
-# Cse2/CasB-like protein superposed on E. coli CasB (PDB 5H9E chain C), PyMOL render; d, its type I-E cas locus.
-# The candidate evidence table is written as a supplementary table: results/supp_fold_candidates.tsv
+# Cse2/CasB-like protein superposed on E. coli CasB (PDB 5H9E chain C), PyMOL render; d, its type I-E cas locus;
+# e, Step 34j Foldseek hit class of the ESMFold models (EU family models vs controls) by mean C-alpha pLDDT bin
+# (results/step34j/models_by_set_plddt_v2.tsv; ProtNLM-only UniProt names counted as unannotated).
+# 2026-10-23: Table S6 (results/supp_fold_candidates.tsv) is no longer written here; scripts/step34j_d2_tables.py
+# rebuilds it from the Step 34j representative models.
 import sys, csv
 import numpy as np
 sys.path.insert(0, "/bigdata/stajichlab/lshad003/wf_protein_space/scripts")
 import figstyle as fs
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
+from matplotlib.patches import Polygon, Patch
 fs.setup(); R = fs.W + "/results/"; F = plt.rcParams["font.sans-serif"][0]
 plt.rcParams.update({"mathtext.fontset": "custom", "mathtext.rm": F, "mathtext.it": F + ":italic", "mathtext.bf": F + ":bold"})
 def rows(f): return list(csv.DictReader(open(R + f), delimiter="\t"))
 COL = {"queries": "#AA3377", "K": "#4477AA", "decoys": "#999999"}
 NAME = {"queries": "Recurrent EU families", "K": "Known, length-matched", "decoys": "Reversed decoys"}
-fig = plt.figure(figsize=(7.08, 4.3))
-g = fig.add_gridspec(2, 3, width_ratios=[1, 1, 1.2], height_ratios=[1, 0.55], hspace=0.6, wspace=0.5)
+fig = plt.figure(figsize=(7.08, 4.9))
+g = fig.add_gridspec(2, 3, width_ratios=[1, 1, 1.2], height_ratios=[1, 0.75], hspace=0.6, wspace=0.5)
 be = rows("fig_prep_bestE.tsv"); xs = np.linspace(0, 20, 401); ax = fig.add_subplot(g[0, 0])
 for s in ("K", "queries", "decoys"):
     v = np.array([-np.log10(float(r["bestE"])) if r["bestE"] != "NA" else -1.0 for r in be if r["set"] == s])
@@ -60,7 +63,7 @@ neg = c2["strand"].strip() in ("-", "-1"); E0 = max(int(r["end"]) for r in lo); 
 def tr(r):
     a, b = int(r["start"]), int(r["end"]); st = 1 if r["strand"].strip() in ("+", "1") else -1
     return (E0 - b, E0 - a, -st) if neg else (a - S0, b - S0, st)
-ax = fig.add_subplot(g[1, :]); ax.plot([0, xe], [0, 0], color="#333333", linewidth=0.5, zorder=1); jl = 0
+ax = fig.add_subplot(g[1, 0:2]); ax.plot([0, xe], [0, 0], color="#333333", linewidth=0.5, zorder=1); jl = 0
 for r in sorted(lo, key=lambda r: tr(r)[0]):
     a, b, st = tr(r); hd = min(120, 0.45 * (b - a)); h = 0.34
     pts = [(a, -h / 2), (b - hd, -h / 2), (b, 0), (b - hd, h / 2), (a, h / 2)] if st > 0 else [(b, -h / 2), (a + hd, -h / 2), (a, 0), (a + hd, h / 2), (b, h / 2)]
@@ -75,20 +78,23 @@ for r in sorted(lo, key=lambda r: tr(r)[0]):
 print("locus genes:", [(num(r), (r.get(cn) or "") if cn else "") for r in lo])
 ax.plot([0, 1000], [-0.62, -0.62], color="black", linewidth=0.7); ax.text(500, -0.67, "1 kb", ha="center", va="top", fontsize=5)
 ax.set_xlim(-60, xe + 60); ax.set_ylim(-0.8, 0.6); ax.axis("off"); fs.letter(ax, "d")
+HC = [("experimental", "PDB or CATH50", "#333333"), ("AFDB_annotated", "AFDB50, annotated", "#777777"),
+      ("AFDB_unannotated_only", "AFDB50, unannotated only", "#BBBBBB"), ("ESMAtlas_only", "ESM Atlas only", "#E3E3E3"), ("none", "no hit", "#FFFFFF")]
+MB = [r for r in csv.DictReader(open(R + "step34j/models_by_set_plddt_v2.tsv"), delimiter="\t") if r["protnlm_rule"] == "unannotated"]
+PB = [(">=70", "\u226570"), ("50-70", "50\u201370"), ("<50", "<50")]
+ax = fig.add_subplot(g[1, 2]); xs, xl = [], []
+for gi, (st, sl) in enumerate((("EU", "EU"), ("control", "Known"))):
+    for bi, (b, bl) in enumerate(PB):
+        r = next(r for r in MB if r["set"] == st and r["plddt_bin"] == b); n = int(r["n_models"]); x = gi * 3.6 + bi; bot = 0
+        for k, _, c in HC:
+            v = 100.0 * int(r[k]) / n; ax.bar(x, v, 0.8, bottom=bot, color=c, edgecolor=COL["queries" if st == "EU" else "K"], linewidth=0.5); bot += v
+        ax.text(x, 101.5, format(n, ","), ha="center", va="bottom", fontsize=4.5)
+        xs.append(x); xl.append(bl)
+        print("Fig. 4e %s pLDDT %s: n %d, %s" % (st, b, n, ", ".join("%s %s" % (k, r[k]) for k, _, _ in HC)))
+ax.set_xticks(xs); ax.set_xticklabels(xl, fontsize=5); ax.set_ylim(0, 108); ax.set_ylabel("Models (%)")
+for gi, (st, sl) in enumerate((("EU", "EU families"), ("control", "Known"))):
+    ax.text(gi * 3.6 + 1, -24, sl, ha="center", va="top", fontsize=5.5, color=COL["queries" if st == "EU" else "K"])
+ax.text(3.1, -13, "pLDDT", ha="center", va="top", fontsize=5)
+ax.legend(handles=[Patch(facecolor=c, edgecolor="#333333", linewidth=0.4, label=l) for _, l, c in HC], frameon=False, fontsize=5,
+          loc="upper left", bbox_to_anchor=(1.0, 1.0), handlelength=1.0); fs.letter(ax, "e")
 fs.save(fig, "fig4_structure")
-CAND = [("UHM636.41030__k141_332084_5", "Cse2/CasB-like", "accepted: fold and type I-E cas operon"),
-        ("UHM125.35769__k141_151130_2", "DivIVA-like", "tentative: partial match; neighbours UbiA, DUF4229"),
-        ("UHM145.35772__k141_106404_54", "HTH-like", "tentative: small helical bundle"),
-        ("UHM145.35771__k141_106979_4", "helical repeat-like", "HEAT-like solenoid (TM-align); no function")]
-s29, f29, nb = rows("step29e_foldseek_summary.tsv"), rows("step29f_foldseek_web_tm.tsv"), rows("step29d_fold4_neighbours.tsv")
-with open(R + "supp_fold_candidates.tsv", "w") as o:
-    o.write("rep\tcandidate\tplddt\tptm\tbest_pdb_cath_qtm\tbest_afdb50_qtm\tafdb50_description\ttop_neighbours\tcall\n")
-    for q, lab, call in CAND:
-        e = [r for r in s29 if r["query"] == q]; af = [r for r in f29 if r["protein"] == q and r["db"] == "afdb50" and float(r["prob"]) >= 0.5]
-        afb = max(af, key=lambda r: float(r["qTM"])) if af else None; mem = {r["member"] for r in nb if r["family_rep"] == q}; cnt = {}
-        for r in nb:
-            if r["family_rep"] == q and r["pfam"] not in ("", "NA", "-"): cnt.setdefault(r["pfam"], set()).add(r["member"])
-        top = "; ".join("%s %d/%d" % (k, len(v), len(mem)) for k, v in sorted(cnt.items(), key=lambda kv: -len(kv[1]))[:2])
-        o.write("%s\t%s\t%s\t%s\t%.3f\t%s\t%s\t%s\t%s\n" % (q, lab, e[0]["plddt"], e[0]["ptm"], max(float(r["qtmscore"]) for r in e),
-                afb["qTM"] if afb else "NA", afb.get("description", "") if afb else "NA", top, call))
-print("wrote results/supp_fold_candidates.tsv")
