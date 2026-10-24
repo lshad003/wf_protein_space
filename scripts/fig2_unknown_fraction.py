@@ -55,9 +55,11 @@ ax.set_ylabel("% of microbial representatives"); fs.letter(ax, "a")
 ax = fig.add_subplot(g[0, 1])
 for c in CL:
     v = np.sort(np.array(L[c])); ax.plot(v, 100.0 * np.arange(1, len(v) + 1) / len(v), color=CC[c], linewidth=0.9,
-                                         label="%s (median %d aa)" % (c, int(np.median(v))))
+                                         label="%s  %d aa" % (c, int(np.median(v))))
 ax.set_xscale("log"); ax.set_xlabel("protein length (aa)"); ax.set_ylabel("cumulative % of representatives")
-ax.set_ylim(0, 100); ax.legend(frameon=False, fontsize=5, loc="lower right"); fs.letter(ax, "b")
+ax.set_ylim(0, 100); fs.letter(ax, "b")
+# compact legend on the right-hand plateau, clear of all curves (2026-10-23)
+ax.legend(frameon=False, fontsize=5, loc="center right", title="median length", title_fontsize=5, handlelength=1.2)
 ax = fig.add_subplot(g[0, 2]); bot = np.zeros(4)
 GRP = [("complete", ["00"], "#333333"), ("one end truncated", ["01", "10"], "#999999"), ("both ends truncated", ["11"], "#DDDDDD")]
 for lab, codes, col in GRP:

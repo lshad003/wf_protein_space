@@ -20,8 +20,9 @@ ax = axs[0]; bins = np.arange(20, 101, 2.5)
 for s in ("control", "EU"):
     v = [float(r["mean_ca_plddt"]) for r in S if r["set"] == s]
     ax.hist(v, bins=bins, histtype="step", color=COL[s], linewidth=0.9, label="%s (n = %s)" % (NAME[s], format(len(v), ",")))
-for x in (50, 70): ax.axvline(x, color="#555555", linewidth=0.5, linestyle=(0, (2, 2)))
-ax.set_ylim(0, 680); ax.set_xlabel("Mean Cα pLDDT"); ax.set_ylabel("Models"); ax.legend(frameon=False, fontsize=5, loc="upper left"); fs.letter(ax, "a")
+for x in (50, 70): ax.axvline(x, ymax=0.78, color="#555555", linewidth=0.5, linestyle=(0, (2, 2)))  # stop below the legend (2026-10-23)
+ax.set_ylim(0, 680); ax.set_xlabel("Mean Cα pLDDT"); ax.set_ylabel("Models")
+ax.legend(frameon=False, fontsize=5, loc="upper left"); fs.letter(ax, "a")
 ax = axs[1]; PB = [("<50", "<50"), ("50-70", "50–70"), (">=70", "≥70")]; x = np.arange(3)
 for s in ("EU", "control"):
     for c, ls in (("E<=1e-3", "-"), ("E<=1e-3,qTM>=0.5", (0, (2, 1.5)))):
