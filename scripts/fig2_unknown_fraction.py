@@ -89,12 +89,12 @@ nm = {r["rep"]: r for r in rows("step34c_strict_eu_nmpfams2.tsv")}; cm = {r["rep
 fam = {r["family_rep"] for r in rows("step34c2c_strict_v2_families.tsv") if r["recurrent"] == "1" and r["excluded"] == "0"}
 srch = [x for x in cm if nm.get(x, {}).get("in_step26_set") == "1"]
 SETS = [("all searched", srch), ("still EU, any rule", [x for x in srch if cm[x]["class_any"] == "EU"]),
-        ("still EU, majority rule", [x for x in srch if cm[x]["class_majority"] == "EU"]), ("recurrent families", [x for x in srch if nm[x]["family_rep"] in fam])]
+        ("still EU, majority rule", [x for x in srch if cm[x]["class_majority"] == "EU"]), ("recurrent-family representatives", [x for x in srch if nm[x]["family_rep"] in fam])]
 ax = fig.add_subplot(g[1, 2])
 for i, (lab, s) in enumerate(SETS):
     u = sum(1 for x in s if nm[x]["matched"] == "0"); pu = 100.0 * u / len(s)
     ax.barh(i, pu, color=CC["EU"], height=0.6, linewidth=0); ax.barh(i, 100 - pu, left=pu, color="#BBBBBB", height=0.6, linewidth=0)
     ax.text(2, i, "%.2f%% of %s" % (pu, format(len(s), ",")), va="center", color="white", fontsize=5); print("NMPFams2 %s: %d / %d unmatched" % (lab, u, len(s)))
-ax.set_yticks(range(len(SETS))); ax.set_yticklabels([s[0] for s in SETS], fontsize=5); ax.invert_yaxis(); ax.set_xlim(0, 100)
+ax.set_yticks(range(len(SETS))); ax.set_yticklabels([s[0].replace("-family ", "-family\n") for s in SETS], fontsize=5); ax.invert_yaxis(); ax.set_xlim(0, 100)
 ax.set_xlabel("% without an NMPFams2 match"); fs.letter(ax, "f")
 fs.save(fig, "fig2_unknown_fraction" + TAG)
